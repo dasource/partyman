@@ -5,7 +5,7 @@ messages=(
 
     ["partyman_version"]="partyman version"
     ["gathering_info"]="gathering info, please wait... "
-    ["done"]="DONE!"
+    ["done"]=" done!"
     ["exiting"]="Exiting."
 
     ["days"]="days"

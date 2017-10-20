@@ -14,12 +14,10 @@ C_PURPLE="\e[35m"
 C_CYAN="\e[36m"
 C_NORM="\e[0m"
 
-PARTY_ORG=''
-DOWNLOAD_PAGE=''
-CHECKSUM_URL=''
 PARTYD_RUNNING=0
 PARTYD_RESPONDING=0
 PARTYMAN_VERSION=$(cat $PARTYMAN_GITDIR/VERSION)
+DATA_DIR="$HOME/.particl"
 #PARTYMAN_CHECKOUT=$(GIT_DIR=$PARTYMAN_GITDIR/.git GIT_WORK_TREE=$PARTYMAN_GITDIR git describe --dirty | sed -e "s/^.*-\([0-9]\+-g\)/\1/" )
 #if [ "$PARTYMAN_CHECKOUT" == "v"$PARTYMAN_VERSION ]; then
     PARTYMAN_CHECKOUT=""
@@ -98,26 +96,6 @@ usage(){
             ${messages["usage_version_description"]}
 
 EOF
-}
-
-function cache_output(){
-    # cached output
-    FILE=$1
-    # command to cache
-    CMD=$2
-    OLD=0
-    CONTENTS=""
-    # is cache older than 1 minute?
-    if [ -e $FILE ]; then
-        OLD=$(find $FILE -mmin +1 -ls | wc -l)
-        CONTENTS=$(cat $FILE);
-    fi
-    # is cache empty or older than 1 minute? rebuild
-    if [ -z "$CONTENTS" ] || [ "$OLD" -gt 0 ]; then
-        CONTENTS=$(eval $CMD)
-        echo "$CONTENTS" > $FILE
-    fi
-    echo "$CONTENTS"
 }
 
 _check_dependencies() {
@@ -313,11 +291,11 @@ restart_particld(){
         PARTYD_RUNNING=0
     fi
 
-    pending " --> ${messages["deleting_cache_files"]}"
+    pending " --> ${messages["deleting_cache_files"]} $DATA_DIR/ "
 
     cd $INSTALL_DIR
 
-    rm -f banlist.dat peers.dat
+    rm -f "$DATA_DIR"/banlist.dat "$DATA_DIR"/peers.dat
     ok "${messages["done"]}"
 
     pending " --> ${messages["starting_particld"]}"
@@ -373,13 +351,14 @@ install_particld(){
     # prep it ----------------------------------------------------------------
 
     mkdir -p $INSTALL_DIR
+    mkdir -p $DATA_DIR
 
-    if [ ! -e $INSTALL_DIR/particl.conf ] ; then
-        pending " --> ${messages["creating"]} particl.conf... "
+    if [ ! -e $DATA_DIR/particl.conf ] ; then
+        pending " --> ${messages["creating"]} $DATA_DIR/particl.conf... "
 
-#        while read; do
-#            eval echo "$REPLY"
-#        done < $PARTYMAN_GITDIR/particl.conf.template > $INSTALL_DIR/particl.conf
+        while read; do
+            eval echo "$REPLY"
+        done < $PARTYMAN_GITDIR/particl.conf.template > "$DATA_DIR"/particl.conf
         ok "${messages["done"]}"
     fi
 
@@ -464,6 +443,35 @@ install_particld(){
     sed -i.bak -e '/partyman_env/d' ~/.bash_aliases
     echo "export PATH=$INSTALL_DIR:\$PATH; # partyman_env" >> ~/.bash_aliases
     ok "${messages["done"]}"
+
+    # autoboot it ------------------------------------------------------------
+
+    INIT=$(ps --no-headers -o comm 1)
+    if [ $INIT == "systemd" ] && [ "$USER" == "particl" ] && [ ! -z "$SUDO_USER" ]; then
+        pending " --> detecting $INIT for auto boot ($USER) ... "
+	ok ${messages["done"]}
+	DOWNLOAD_SERVICE="https://raw.githubusercontent.com/particl/particl-core/master/contrib/init/particld.service"
+        pending " --> [systemd] ${messages["downloading"]} ${DOWNLOAD_SERVICE}... "
+	$wget_cmd -O - $DOWNLOAD_SERVICE | pv -trep -w80 -N service > particld.service
+        if [ ! -e particld.service ] ; then
+           echo -e "${C_RED}error ${messages["downloading"]} file"
+           echo -e "tried to get particld.service$C_NORM"
+        else
+           ok ${messages["done"]}
+	   pending " --> [systemd] installing service ... "
+	   if sudo cp -rf particld.service /etc/systemd/system/; then
+	       ok ${messages["done"]}
+	   fi
+           pending " --> [systemd] reloading systemd service ... "
+	   if sudo systemctl daemon-reload; then
+	       ok ${messages["done"]}
+	   fi
+           pending " --> [systemd] enable particld system startup ... "
+	   if sudo systemctl enable particld; then
+               ok ${messages["done"]}
+           fi
+        fi
+    fi
 
     # poll it ----------------------------------------------------------------
 
@@ -752,16 +760,4 @@ show_message_configure() {
 
 get_public_ips() {
     PUBLIC_IPV4=$($curl_cmd -4 https://icanhazip.com/)
-}
-
-cat_until() {
-    PATTERN=$1
-    FILE=$2
-    while read; do
-        if [[ "$REPLY" =~ $PATTERN ]]; then
-            return
-        else
-            echo "$REPLY"
-        fi
-    done < $FILE
 }
