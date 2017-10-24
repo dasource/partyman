@@ -328,6 +328,16 @@ install_particld(){
     INSTALL_DIR=$HOME/Particl
     PARTY_CLI="$INSTALL_DIR/particl-cli"
 
+    if [ $USER != "particl" ]; then
+        echo
+        warn "We stronly advice you run this installer under user "particl" with sudo access. Are you sure you wish to continue as $USER?"
+        if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
+            echo -e "${C_RED}${messages["exiting"]}$C_NORM"
+            echo ""
+            exit 0
+        fi
+    fi
+
     if [ -e $INSTALL_DIR ] ; then
         die "\n - ${messages["preexisting_dir"]} $INSTALL_DIR ${messages["found"]} ${messages["run_reinstall"]} ${messages["exiting"]}"
     fi
