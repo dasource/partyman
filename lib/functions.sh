@@ -277,6 +277,7 @@ _check_particld_state() {
     fi
     if [ $( $PARTY_CLI help 2>/dev/null | wc -l ) -gt 0 ]; then
         PARTYD_RESPONDING=1
+        PARTYD_WALLET=$( $PARTY_CLI getwalletinfo | jq -r .encryptionstatus )
     fi
 }
 
@@ -509,7 +510,7 @@ update_particld(){
 
 coldstaking_init(){
 
-    if [ $PARTYD_RUNNING == 1 ]; then
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
 	pending " --> ${messages["coldstaking_init_walletcheck"]}"
 	if $PARTY_CLI extkey account > /dev/null 2>&1; then
             die "\n - wallet already exists - 'partyman coldstaking' to view list of current cold staking public keys or 'partyman coldstaking new' to create a new cold staking public key. ${messages["exiting"]}"
@@ -541,7 +542,8 @@ coldstaking_init(){
 	else
 	    die "\n - failed to create new wallet ${messages["exiting"]}"
 	fi
-
+    else
+        die "\n - wallet is locked! Please unluck first. ${messages["exiting"]}"
     fi
 
     echo
@@ -552,7 +554,7 @@ coldstaking_init(){
 
 coldstaking_new(){
 
-    if [ $PARTYD_RUNNING == 1 ]; then
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
         pending " --> ${messages["coldstaking_init_walletcheck"]}"
         if $PARTY_CLI extkey account > /dev/null 2>&1; then
 	    ok "${messages["done"]}"
@@ -579,6 +581,8 @@ coldstaking_new(){
         else
             die "\n - error creating new cold staking public key! ' ${messages["exiting"]}"
         fi
+    else
+        die "\n - wallet is locked! Please unluck first. ${messages["exiting"]}"
     fi
 
 
@@ -586,7 +590,7 @@ coldstaking_new(){
 
 coldstaking_info(){
 
-    if [ $PARTYD_RUNNING == 1 ]; then
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
         pending " --> ${messages["coldstaking_init_walletcheck"]}"
         if $PARTY_CLI extkey account > /dev/null 2>&1; then
             ok "${messages["done"]}"
@@ -616,6 +620,8 @@ coldstaking_info(){
         if [ $FOUNDCOLDSTAKINGKEY == 0 ] || [ -z $FOUNDCOLDSTAKINGKEY ]; then
             die " - no cold staking public keys found, please type 'partyman coldstaking new' to create one. ${messages["exiting"]}"
         fi
+    else
+        die "\n - wallet is locked! Please unluck first. ${messages["exiting"]}"
     fi
 
 }
