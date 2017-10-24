@@ -543,7 +543,7 @@ coldstaking_init(){
 	    die "\n - failed to create new wallet ${messages["exiting"]}"
 	fi
     else
-        die "\n - wallet is locked! Please unluck first. ${messages["exiting"]}"
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
     fi
 
     echo
@@ -582,7 +582,7 @@ coldstaking_new(){
             die "\n - error creating new cold staking public key! ' ${messages["exiting"]}"
         fi
     else
-        die "\n - wallet is locked! Please unluck first. ${messages["exiting"]}"
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
     fi
 
 
@@ -621,7 +621,7 @@ coldstaking_info(){
             die " - no cold staking public keys found, please type 'partyman coldstaking new' to create one. ${messages["exiting"]}"
         fi
     else
-        die "\n - wallet is locked! Please unluck first. ${messages["exiting"]}"
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
     fi
 
 }
