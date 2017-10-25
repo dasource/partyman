@@ -90,7 +90,7 @@ messages=(
     ["quit_uptodate"]="Up to date."
 
     ["requires_updating"]="requires updating. Latest version is:"
-    ["requires_sync"]="Do 'github pull' manually or download the latest version."
+    ["requires_sync"]="Do 'git pull' manually or download the latest version."
 
     ["no_forks_detected"]="no forks detected"
 
