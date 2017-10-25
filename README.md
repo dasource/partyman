@@ -12,6 +12,17 @@ To install partyman do:
     sudo apt-get install python git unzip pv jq
     cd ~ && git clone https://github.com/dasource/partyman
 
+
+To get the current status of particld, do:
+
+    partyman/partyman status
+
+To get the RPC command `getinfo` and `getwalletinfo` from particld, do:
+
+    partyman/partyman getinfo
+
+
+
 To perform a new install of particl, do:
 
     partyman/partyman install
@@ -24,22 +35,19 @@ To restart (or start) particld, do:
 
     partyman/partyman restart
 
-To get the current status of particld, do:
 
-    partyman/partyman status
 
-To create a new wallet, do:
+To create a new wallet on this staking node, do:
 
-    partyman/partyman coldstaking init
+    partyman/partyman stakingnode init
 
-To create a new cold staking public key, do:
+To create a new public key on this staking node, do:
 
-    partyman/partyman coldstaking new
+    partyman/partyman stakingnode new
 
-To get a list of cold staking public keys on this daemon, do:
+To get a list of public keys on this staking node, do:
 
-    partyman/partyman coldstaking
-
+    partyman/partyman stakingnode
 
 
 # Commands

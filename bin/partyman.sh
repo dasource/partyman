@@ -164,7 +164,7 @@ case "$1" in
 		elif [ "$APP" == 'info' ]; then
                     stakingnode_info
 		else
-                    echo "don't know how to coldstaking: $2"
+                    echo "don't know how to stakingnode: $2"
                 fi
 	    else
 		stakingnode_info
