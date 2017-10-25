@@ -147,7 +147,7 @@ case "$1" in
             print_status
             quit 'Exiting.'
             ;;
-        coldstaking)
+        stakingnode)
             COMMAND=$1
             pending "${messages["gathering_info"]}"
             _check_partyman_updates
@@ -158,16 +158,16 @@ case "$1" in
             if [ ! -z "$2" ]; then
                 APP=$2;
                 if [ "$APP" == 'init' ]; then
-                    coldstaking_init
+                    stakingnode_walletinit
                 elif [ "$APP" == 'new' ]; then
-                    coldstaking_new
+                    stakingnode_newpublickey
 		elif [ "$APP" == 'info' ]; then
-                    coldstaking_info
+                    stakingnode_info
 		else
                     echo "don't know how to coldstaking: $2"
                 fi
 	    else
-		coldstaking_info
+		stakingnode_info
 	    fi
             ;;
         getinfo)

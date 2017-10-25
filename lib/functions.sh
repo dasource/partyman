@@ -81,11 +81,11 @@ usage(){
 
             ${messages["usage_restart_description_now"]}
 
-	coldstaking [init, new]
+	stakingnode [init, new]
 
-	    ${messages["usage_coldstaking_description"]}
-	    ${messages["usage_coldstaking_init_description"]}
-	    ${messages["usage_coldstaking_new_description"]}
+	    ${messages["usage_stakingnode_description"]}
+	    ${messages["usage_stakingnode_init_description"]}
+	    ${messages["usage_stakingnode_new_description"]}
 
         status
 
@@ -518,18 +518,18 @@ update_particld(){
      exit 1
 }
 
-coldstaking_init(){
+stakingnode_walletinit(){
 
     if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
-	pending " --> ${messages["coldstaking_init_walletcheck"]}"
+	pending " --> ${messages["stakingnode_init_walletcheck"]}"
 	if $PARTY_CLI extkey account > /dev/null 2>&1; then
-            die "\n - wallet already exists - 'partyman coldstaking' to view list of current cold staking public keys or 'partyman coldstaking new' to create a new cold staking public key. ${messages["exiting"]}"
+            die "\n - wallet already exists - 'partyman stakingnode' to view list of current staking node public keys or 'partyman stakingnode new' to create a new staking node public key. ${messages["exiting"]}"
 	else
 	    ok "${messages["done"]}"
 	fi
 
 	echo
-        pending " --> ${messages["coldstaking_init_walletgenerate"]}"
+        pending " --> ${messages["stakingnode_init_walletgenerate"]}"
 	MNEMONIC=$( $PARTY_CLI mnemonic new | grep mnemonic | cut -f2 -d":" | sed 's/\ "//g' | sed 's/\",//g' )
 	MNEMONIC_COUNT=$(echo "$MNEMONIC" | wc -w)
 	if [ $MNEMONIC_COUNT == 24 ]; then 
@@ -546,7 +546,7 @@ coldstaking_init(){
             exit 0
         fi
 
-	pending " --> ${messages["coldstaking_init_walletcreate"]}"
+	pending " --> ${messages["stakingnode_init_walletcreate"]}"
 	if $PARTY_CLI extkeyimportmaster "$MNEMONIC" 2>&1 >/dev/null; then
             ok "${messages["done"]}"
 	else
@@ -557,24 +557,24 @@ coldstaking_init(){
     fi
 
     echo
-    echo -e "    ${C_YELLOW}partyman coldstaking info$C_NORM"
+    echo -e "    ${C_YELLOW}partyman stakingnode info$C_NORM"
     echo
 
 }
 
-coldstaking_new(){
+stakingnode_newpublickey(){
 
     if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
-        pending " --> ${messages["coldstaking_init_walletcheck"]}"
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
         if $PARTY_CLI extkey account > /dev/null 2>&1; then
 	    ok "${messages["done"]}"
 	else
-            die "\n - no wallet exists, please type 'partyman coldstaking init' ${messages["exiting"]}"
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
         echo
 
-	pending "Create new cold staking public key?"
+	pending "Create new staking node public key?"
         if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
             echo -e "${C_RED}${messages["exiting"]}$C_NORM"
             echo ""
@@ -585,11 +585,11 @@ coldstaking_new(){
 	read pubkeylabel
 
 	echo
-        pending " --> ${messages["coldstaking_new_publickey"]}"
-	if $PARTY_CLI getnewextaddress "coldstaking_$pubkeylabel"; then
+        pending " --> ${messages["stakingnode_new_publickey"]}"
+	if $PARTY_CLI getnewextaddress "stakingnode_$pubkeylabel"; then
             ok ""
         else
-            die "\n - error creating new cold staking public key! ' ${messages["exiting"]}"
+            die "\n - error creating new staking node public key! ' ${messages["exiting"]}"
         fi
     else
         die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
@@ -598,37 +598,37 @@ coldstaking_new(){
 
 }
 
-coldstaking_info(){
+stakingnode_info(){
 
     if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
-        pending " --> ${messages["coldstaking_init_walletcheck"]}"
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
         if $PARTY_CLI extkey account > /dev/null 2>&1; then
             ok "${messages["done"]}"
         else
-            die "\n - no wallet exists, please type 'partyman coldstaking init' ${messages["exiting"]}"
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
         ACCOUNTID=$( $PARTY_CLI extkey account | grep "\"id"\" | cut -f2 -d":" | sed 's/\ "//g' | sed 's/\",//g' )
 
 	echo
-	FOUNDCOLDSTAKINGKEY=0
+	FOUNDSTAKINGNODEKEY=0
 	for ID in $ACCOUNTID;
 	do
             IDINFO=$($PARTY_CLI extkey key $ID true 2>&-)
 	    IDINFO_LABEL=$( echo $IDINFO | jq -r .label)
-	    if echo $IDINFO_LABEL | grep -q "coldstaking"; then
+	    if echo $IDINFO_LABEL | grep -q "stakingnode"; then
 	    	IDINFO_PUBKEY=$( echo $IDINFO | jq -r .epkey)
-                pending " --> Cold Staking Label : "
+                pending " --> Staking Node Label : "
                 ok $IDINFO_LABEL
-		pending " --> Cold Staking Public Key : "
+		pending " --> Staking Node Public Key : "
 	    	ok $IDINFO_PUBKEY
 		echo
-		FOUNDCOLDSTAKINGKEY=1
+		FOUNDSTAKINGNODEKEY=1
 	    fi
 	done
 
-        if [ $FOUNDCOLDSTAKINGKEY == 0 ] || [ -z $FOUNDCOLDSTAKINGKEY ]; then
-            die " - no cold staking public keys found, please type 'partyman coldstaking new' to create one. ${messages["exiting"]}"
+        if [ $FOUNDSTAKINGNODEKEY == 0 ] || [ -z $FOUNDSTAKINGNODEKEY ]; then
+            die " - no staking node public keys found, please type 'partyman stakingnode new' to create one. ${messages["exiting"]}"
         fi
     else
         die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"

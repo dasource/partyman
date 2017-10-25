@@ -79,9 +79,9 @@ messages=(
     ["usage_branch_description"]="switch partyman to an alternate/experimental github branch"
     ["usage_reinstall_description"]="overwrites particl with latest version and restarts (pending)"
     ["usage_version_description"]="prints partymans version number and exits"
-    ["usage_coldstaking_description"]="displays current cold staking wallets on this particl daemon"
-    ["usage_coldstaking_init_description"]="[init] creates a new wallet"
-    ["usage_coldstaking_new_description"]="[new] creates a new cold staking public key to use with your cold staking wallet"
+    ["usage_stakingnode_description"]="displays current cold staking wallets on this particl daemon"
+    ["usage_stakingnode_init_description"]="[init] creates a new wallet"
+    ["usage_stakingnode_new_description"]="[new] creates a new cold staking public key to use with your cold staking wallet"
 
 
 
@@ -126,9 +126,8 @@ messages=(
     ["found"]="found."
     ["breakline"]=""
 
-    ["coldstaking_init_walletcheck"]="checking wallet ... "
-    ["coldstaking_init_walletgenerate"]="recovery phrase : "
-    ["coldstaking_init_walletcreate"]="creating wallet ... "
-    ["coldstaking_new_publickey"]="creating new cold staking public new ... "
-    ["coldstaking_new_publickey"]="Cold Staking Public Key : "
+    ["stakingnode_init_walletcheck"]="checking wallet ... "
+    ["stakingnode_init_walletgenerate"]="recovery phrase : "
+    ["stakingnode_init_walletcreate"]="creating wallet ... "
+    ["stakingnode_new_publickey"]="creating new cold staking public new ... "
 )
