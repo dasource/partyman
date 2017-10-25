@@ -79,9 +79,9 @@ messages=(
     ["usage_branch_description"]="switch partyman to an alternate/experimental github branch"
     ["usage_reinstall_description"]="overwrites particl with latest version and restarts (pending)"
     ["usage_version_description"]="prints partymans version number and exits"
-    ["usage_stakingnode_description"]="displays current cold staking wallets on this particl daemon"
+    ["usage_stakingnode_description"]="displays current public keys on this staking nodes particl daemon"
     ["usage_stakingnode_init_description"]="[init] creates a new wallet"
-    ["usage_stakingnode_new_description"]="[new] creates a new cold staking public key to use with your cold staking wallet"
+    ["usage_stakingnode_new_description"]="[new] creates a new public key to use with your cold staking wallet"
 
 
 
