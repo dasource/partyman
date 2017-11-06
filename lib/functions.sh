@@ -718,6 +718,30 @@ dateDiff (){
     echo $((diffSec/sec*abs))
 }
 
+function displaytime()
+{
+    local t=$1
+
+    local d=$((t/60/60/24))
+    local h=$((t/60/60%24))
+    local m=$((t/60%60))
+    local s=$((t%60))
+
+    if [[ $d > 0 ]]; then
+            [[ $d = 1 ]] && echo -n "$d day " || echo -n "$d days "
+    fi
+    if [[ $h > 0 ]]; then
+            [[ $h = 1 ]] && echo -n "$h hour " || echo -n "$h hours "
+    fi
+    if [[ $m > 0 ]]; then
+            [[ $m = 1 ]] && echo -n "$m minute " || echo -n "$m minutes "
+    fi
+    if [[ $d = 0 && $h = 0 && $m = 0 ]]; then
+            [[ $s = 1 ]] && echo -n "$s second" || echo -n "$s seconds"
+    fi
+    echo
+}
+
 get_host_status(){
     HOST_LOAD_AVERAGE=$(cat /proc/loadavg | awk '{print $1" "$2" "$3}')
     uptime=$(</proc/uptime)
@@ -733,8 +757,6 @@ print_getinfo() {
 	$PARTY_CLI getinfo
 	$PARTY_CLI getwalletinfo
     fi
-
-
 }
 
 print_status() {
@@ -745,7 +767,7 @@ print_status() {
     pending "${messages["status_particldve"]}" ; ok "$CURRENT_VERSION"
     pending "${messages["status_uptodat"]}" ; [ $PARTYD_UP_TO_DATE -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_running"]}" ; [ $PARTYD_HASPID     -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_uptimed"]}" ; [ $PARTYD_RUNNING    -gt 0 ] && ok "$PARTYD_UPTIME" || err "$PARTYD_UPTIME"
+    pending "${messages["status_uptimed"]}" ; [ $PARTYD_UPTIME    -gt 0 ] && ok "$(displaytime $PARTYD_UPTIME)" || err "$PARTYD_UPTIME"
     pending "${messages["status_drespon"]}" ; [ $PARTYD_RUNNING    -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_dlisten"]}" ; [ $PARTYD_LISTENING  -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_dconnec"]}" ; [ $PARTYD_CONNECTED  -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
@@ -761,9 +783,6 @@ print_status() {
     	pending "${messages["status_stakedi"]}" ; ok "$STAKING_DIFF"
     	pending "${messages["status_stakewe"]}" ; ok "$PARTYD_STAKEWEIGHT / $PARTYD_NETSTAKEWEIGHT"
     fi
-
-
-
 }
 
 show_message_configure() {
