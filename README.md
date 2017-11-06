@@ -1,6 +1,6 @@
 # partyman
 
-Particl wallet/daemon management utilities - version 0.1
+Particl wallet/daemon management utilities - version 0.4
 
 * This script installs, updates, and manages single-user particl daemons and wallets
 * This script provides the ability to create a new wallet and manage staking node (cold staking functionality)
