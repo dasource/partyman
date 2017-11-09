@@ -671,6 +671,7 @@ get_particld_status(){
     PARTYD_CURRENT_BLOCK=`$PARTY_CLI getblockcount 2>/dev/null`
     if [ -z "$PARTYD_CURRENT_BLOCK" ] ; then PARTYD_CURRENT_BLOCK=0 ; fi
 
+
     WEB_BLOCK_COUNT_CHAINZ=$($curl_cmd https://chainz.cryptoid.info/part/api.dws?q=getblockcount | jq -r .);
     if [ -z "$WEB_BLOCK_COUNT_CHAINZ" ]; then
         WEB_BLOCK_COUNT_CHAINZ=0
@@ -681,11 +682,11 @@ get_particld_status(){
         WEB_BLOCK_COUNT_PART=0
     fi
 
-    CHECK_SYNC_AGAINST_HEIGHT=$(echo "$WEB_BLOCK_COUNT_CHAINZ" | tr " " "\n" | sort -rn | head -1)
     PARTYD_SYNCED=0
-
-    if [ $PARTYD_CURRENT_BLOCK == $WEB_BLOCK_COUNT_CHAINZ ] || [ $PARTYD_CURRENT_BLOCK == $WEB_BLOCK_COUNT_PART ] || [ $PARTYD_CURRENT_BLOCK -ge $WEB_BLOCK_COUNT_CHAINZ -5 ] || [ $PARTYD_CURRENT_BLOCK -ge $WEB_BLOCK_COUNT_PART -5 ]; then
-        PARTYD_SYNCED=1
+    if [ $PARTYD_RUNNING == 1 ]; then
+        if [ $PARTYD_CURRENT_BLOCK == $WEB_BLOCK_COUNT_CHAINZ ] || [ $PARTYD_CURRENT_BLOCK == $WEB_BLOCK_COUNT_PART ] || [ $PARTYD_CURRENT_BLOCK -ge $WEB_BLOCK_COUNT_CHAINZ -5 ] || [ $PARTYD_CURRENT_BLOCK -ge $WEB_BLOCK_COUNT_PART -5 ]; then
+            PARTYD_SYNCED=1
+        fi
     fi
 
     PARTYD_CONNECTED=0
