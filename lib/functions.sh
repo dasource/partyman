@@ -18,6 +18,7 @@ PARTYD_RUNNING=0
 PARTYD_RESPONDING=0
 PARTYMAN_VERSION=$(cat $PARTYMAN_GITDIR/VERSION)
 DATA_DIR="$HOME/.particl"
+DOWNLOAD_PAGE="https://github.com/particl/particl-core/releases"
 #PARTYMAN_CHECKOUT=$(GIT_DIR=$PARTYMAN_GITDIR/.git GIT_WORK_TREE=$PARTYMAN_GITDIR git describe --dirty | sed -e "s/^.*-\([0-9]\+-g\)/\1/" )
 #if [ "$PARTYMAN_CHECKOUT" == "v"$PARTYMAN_VERSION ]; then
     PARTYMAN_CHECKOUT=""
@@ -179,18 +180,18 @@ _find_particl_directory() {
     elif [ -e $HOME/.particl/particl-cli ] ; then
         INSTALL_DIR="$HOME/.particl" ;
 
-    elif [ -e $HOME/Particl/particl-cli ] ; then
-        INSTALL_DIR="$HOME/Particl" ;
+    elif [ -e $HOME/particlcore/particl-cli ] ; then
+        INSTALL_DIR="$HOME/particlcore" ;
     fi
 
     if [ ! -z "$INSTALL_DIR" ]; then
         INSTALL_DIR=$(readlink -f $INSTALL_DIR) 2>/dev/null
         if [ ! -e $INSTALL_DIR ]; then
-            echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/Particl, or \$PATH. -- ${messages["exiting"]}$C_NORM"
+            echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/particlcore, or \$PATH. -- ${messages["exiting"]}$C_NORM"
             exit 1
         fi
     else
-        echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/Particl, or \$PATH. -- ${messages["exiting"]}$C_NORM"
+        echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/particlcore, or \$PATH. -- ${messages["exiting"]}$C_NORM"
         exit 1
     fi
 
@@ -258,8 +259,17 @@ _get_versions() {
 
     if [ -z "$PARTY_CLI" ]; then PARTY_CLI='echo'; fi
     CURRENT_VERSION=$( $PARTY_CLI --version | grep -m1 Particl | sed 's/\Particl Core RPC client version v//g' | sed 's/\.[^.]*$//' 2>/dev/null ) 2>/dev/null
-    LATEST_VERSION=$(curl -s https://api.github.com/repos/particl/particl-core/releases | grep -m 1 tag_name | cut -f2 -d":" | sed 's/\ "v//g' | sed 's/\",//g')
-    if [ -z "$LATEST_VERSION" ]; then
+
+    LVCOUNTER=0
+    while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
+        PR=$(curl -s https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq .prerelease)
+	if [ "$PR" == "false" ]; then
+	    LATEST_VERSION=$(curl -s https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq -r .tag_name | sed 's/v//g')
+	fi 
+        let LVCOUNTER=LVCOUNTER+1
+    done
+
+    if [ -z "$LATEST_VERSION" ] && [ $COMMAND == "install" ]; then
         die "\n${messages["err_could_not_get_version"]} $DOWNLOAD_PAGE -- ${messages["exiting"]}"
     fi
 
@@ -325,7 +335,7 @@ restart_particld(){
 
 install_particld(){
 
-    INSTALL_DIR=$HOME/Particl
+    INSTALL_DIR=$HOME/particlcore
     PARTY_CLI="$INSTALL_DIR/particl-cli"
 
     if [ $USER != "particl" ]; then
@@ -654,19 +664,27 @@ get_particld_status(){
     _get_particld_proc_status
 
     PARTYD_UPTIME=`$PARTY_CLI uptime 2>/dev/null`
+    if [ -z "$PARTYD_UPTIME" ] ; then PARTYD_UPTIME=0 ; fi
+
     PARTYD_LISTENING=`netstat -nat | grep LIST | grep 51738 | wc -l`;
     PARTYD_CONNECTIONS=`netstat -nat | grep ESTA | grep 51738 | wc -l`;
     PARTYD_CURRENT_BLOCK=`$PARTY_CLI getblockcount 2>/dev/null`
     if [ -z "$PARTYD_CURRENT_BLOCK" ] ; then PARTYD_CURRENT_BLOCK=0 ; fi
 
-    WEB_BLOCK_COUNT_CHAINZ=`$curl_cmd https://chainz.cryptoid.info/part/api.dws?q=getblockcount`;
+    WEB_BLOCK_COUNT_CHAINZ=$($curl_cmd https://chainz.cryptoid.info/part/api.dws?q=getblockcount | jq -r .);
     if [ -z "$WEB_BLOCK_COUNT_CHAINZ" ]; then
         WEB_BLOCK_COUNT_CHAINZ=0
     fi
 
+    WEB_BLOCK_COUNT_PART=$($curl_cmd https://explorer.particl.io/particl-insight-api/sync | jq -r .blockChainHeight)
+    if [ -z "$WEB_BLOCK_COUNT_PART" ]; then
+        WEB_BLOCK_COUNT_PART=0
+    fi
+
     CHECK_SYNC_AGAINST_HEIGHT=$(echo "$WEB_BLOCK_COUNT_CHAINZ" | tr " " "\n" | sort -rn | head -1)
     PARTYD_SYNCED=0
-    if [ $CHECK_SYNC_AGAINST_HEIGHT -ge $PARTYD_CURRENT_BLOCK ] && [ $(($CHECK_SYNC_AGAINST_HEIGHT - 5)) -lt $PARTYD_CURRENT_BLOCK ];then
+
+    if [ $PARTYD_CURRENT_BLOCK == $WEB_BLOCK_COUNT_CHAINZ ] || [ $PARTYD_CURRENT_BLOCK == $WEB_BLOCK_COUNT_PART ] || [ $PARTYD_CURRENT_BLOCK -ge $WEB_BLOCK_COUNT_CHAINZ -5 ] || [ $PARTYD_CURRENT_BLOCK -ge $WEB_BLOCK_COUNT_PART -5 ]; then
         PARTYD_SYNCED=1
     fi
 
@@ -674,8 +692,13 @@ get_particld_status(){
     if [ $PARTYD_CONNECTIONS -gt 0 ]; then PARTYD_CONNECTED=1 ; fi
 
     PARTYD_UP_TO_DATE=0
-    if [ $LATEST_VERSION == $CURRENT_VERSION ]; then
-        PARTYD_UP_TO_DATE=1
+    if [ -z "$LATEST_VERSION" ]; then
+        PARTYD_UP_TO_DATE_STATUS="UNKNOWN"
+    else
+        PARTYD_UP_TO_DATE_STATUS="NO"
+        if [ $LATEST_VERSION == $CURRENT_VERSION ]; then
+            PARTYD_UP_TO_DATE=1
+        fi
     fi
 
     get_public_ips
@@ -765,9 +788,9 @@ print_status() {
     pending "${messages["status_uptimeh"]}" ; ok "$HOST_UPTIME_DAYS ${messages["days"]}, $HOST_LOAD_AVERAGE"
     pending "${messages["status_particldip"]}" ; [ $PUBLIC_IPV4 != 'none' ] && ok "$PUBLIC_IPV4" || err "$PUBLIC_IPV4"
     pending "${messages["status_particldve"]}" ; ok "$CURRENT_VERSION"
-    pending "${messages["status_uptodat"]}" ; [ $PARTYD_UP_TO_DATE -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
+    pending "${messages["status_uptodat"]}" ; [ $PARTYD_UP_TO_DATE -gt 0 ] && ok "${messages["YES"]}" || err "$PARTYD_UP_TO_DATE_STATUS"
     pending "${messages["status_running"]}" ; [ $PARTYD_HASPID     -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_uptimed"]}" ; [ $PARTYD_UPTIME    -gt 0 ] && ok "$(displaytime $PARTYD_UPTIME)" || err "$PARTYD_UPTIME"
+    pending "${messages["status_uptimed"]}" ; [ $PARTYD_UPTIME    -gt 0 ] && ok "$(displaytime $PARTYD_UPTIME)" || err "${messages["NO"]}"
     pending "${messages["status_drespon"]}" ; [ $PARTYD_RUNNING    -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_dlisten"]}" ; [ $PARTYD_LISTENING  -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_dconnec"]}" ; [ $PARTYD_CONNECTED  -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
@@ -775,6 +798,7 @@ print_status() {
     pending "${messages["status_dconcnt"]}" ; [ $PARTYD_CONNECTIONS   -gt 0 ] && ok "$PARTYD_CONNECTIONS" || err "$PARTYD_CONNECTIONS"
     pending "${messages["status_dblsync"]}" ; [ $PARTYD_SYNCED     -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_dbllast"]}" ; [ $PARTYD_SYNCED     -gt 0 ] && ok "$PARTYD_CURRENT_BLOCK" || err "$PARTYD_CURRENT_BLOCK"
+    pending "${messages["status_webpart"]}" ; [ $WEB_BLOCK_COUNT_PART -gt 0 ] && ok "$WEB_BLOCK_COUNT_PART" || err "$WEB_BLOCK_COUNT_PART"
     pending "${messages["status_webchai"]}" ; [ $WEB_BLOCK_COUNT_CHAINZ -gt 0 ] && ok "$WEB_BLOCK_COUNT_CHAINZ" || err "$WEB_BLOCK_COUNT_CHAINZ"
     if [ $PARTYD_RUNNING == 1 ]; then
     	pending "${messages["breakline"]}" ; ok ""
