@@ -132,4 +132,8 @@ messages=(
     ["stakingnode_init_walletgenerate"]="recovery phrase : "
     ["stakingnode_init_walletcreate"]="creating wallet ... "
     ["stakingnode_new_publickey"]="creating new cold staking public new ... "
+
+    ["stakingnode_stats_daily"]="getting stats for current month ... "
+    ["stakingnode_stats_monthly"]="getting stats for entire year ... "
+    ["stakingnode_stats_indent"]="   "
 )

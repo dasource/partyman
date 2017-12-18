@@ -163,6 +163,8 @@ case "$1" in
                     stakingnode_newpublickey
 		elif [ "$APP" == 'info' ]; then
                     stakingnode_info
+                elif [ "$APP" == 'stats' ]; then
+                    stakingnode_stats
 		else
                     echo "don't know how to stakingnode: $2"
                 fi

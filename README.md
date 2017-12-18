@@ -1,6 +1,6 @@
 # partyman
 
-Particl wallet/daemon management utilities - version 0.5
+Particl wallet/daemon management utilities - version 0.6
 
 * This script installs, updates, and manages single-user particl daemons and wallets
 * This script provides the ability to create a new wallet and manage staking node (cold staking functionality)
@@ -27,6 +27,10 @@ To perform a new install of particl, do:
 
     partyman/partyman install
 
+To update to the latest version of particl, do:
+
+    partyman/partyman update
+
 To overwrite an existing particl install, do:
 
     partyman/partyman reinstall
@@ -48,6 +52,12 @@ To create a new public key on this staking node, do:
 To get a list of public keys on this staking node, do:
 
     partyman/partyman stakingnode
+
+To get staking stats for this staking node, do:
+
+    partyman/partyman stakingnode stats
+
+
 
 
 # Commands

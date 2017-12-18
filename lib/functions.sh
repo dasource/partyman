@@ -296,7 +296,7 @@ restart_particld(){
     if [ $PARTYD_RUNNING == 1 ]; then
         pending " --> ${messages["stopping"]} particld. ${messages["please_wait"]}"
         $PARTY_CLI stop 2>&1 >/dev/null
-        sleep 20
+        sleep 15
         killall -9 particld particl-shutoff 2>/dev/null
         ok "${messages["done"]}"
         PARTYD_RUNNING=0
@@ -306,7 +306,9 @@ restart_particld(){
 
     cd $INSTALL_DIR
 
-    rm -f "$DATA_DIR"/banlist.dat "$DATA_DIR"/peers.dat
+    rm -rf \
+        "$DATA_DIR"/banlist.dat \
+        "$DATA_DIR"/peers.dat
     ok "${messages["done"]}"
 
     pending " --> ${messages["starting_particld"]}"
@@ -320,7 +322,7 @@ restart_particld(){
     while [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_RESPONDING == 0 ]; do
         echo -n "."
         _check_particld_state
-	sleep 10
+	sleep 5
     done
     if [ $PARTYD_RUNNING == 0 ]; then
         die "\n - particld unexpectedly quit. ${messages["exiting"]}"
@@ -393,7 +395,7 @@ install_particld(){
     tput sc
     echo -e "$C_CYAN"
     $wget_cmd -O - $DOWNLOAD_URL | pv -trep -s27M -w80 -N wallet > $DOWNLOAD_FILE
-    $wget_cmd -O - https://github.com/particl/gitian.sigs/blob/master/$LATEST_VERSION.0-linux/tecnovert/particl-linux-$LATEST_VERSION-build.assert | pv -trep -w80 -N checksums > ${DOWNLOAD_FILE}.DIGESTS.txt
+    $wget_cmd -O - https://raw.githubusercontent.com/particl/gitian.sigs/master/$LATEST_VERSION.0-linux/tecnovert/particl-linux-$LATEST_VERSION-build.assert | pv -trep -w80 -N checksums > ${DOWNLOAD_FILE}.DIGESTS.txt
     echo -ne "$C_NORM"
     clear_n_lines 2
     tput rc
@@ -412,9 +414,12 @@ install_particld(){
     SHA256SUM=$( sha256sum $DOWNLOAD_FILE )
     SHA256PASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS.txt | wc -l )
     if [ $SHA256PASS -lt 1 ] ; then
-        echo -e " ${C_RED} SHA256 ${messages["checksum"]} ${messages["FAILED"]} ${messages["try_again_later"]} ${messages["exiting"]}$C_NORM"
-
-        exit 1
+	$wget_cmd -O - https://api.github.com/repos/particl/particl-core/releases | jq -r .[0] | jq .body > ${DOWNLOAD_FILE}.DIGESTS2.txt
+	SHA256DLPASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS2.txt | wc -l )
+	if [ $SHA256DLPASS -lt 1 ] ; then
+	    echo -e " ${C_RED} SHA256 ${messages["checksum"]} ${messages["FAILED"]} ${messages["try_again_later"]} ${messages["exiting"]}$C_NORM"
+            exit 1
+	fi
     fi
     ok "${messages["done"]}"
 
@@ -450,7 +455,7 @@ install_particld(){
     # permission it ----------------------------------------------------------
 
     if [ ! -z "$SUDO_USER" ]; then
-        chown -h $SUDO_USER:$SUDO_USER {$DOWNLOAD_FILE,${DOWNLOAD_FILE}.DIGESTS.txt,particl-cli,particld,particl-qt,particl*$LATEST_VERSION}
+        chown -h $USER:$USER {$DOWNLOAD_FILE,${DOWNLOAD_FILE}.DIGESTS.txt,particl-cli,particld,particl-qt,particl*$LATEST_VERSION}
     fi
 
     # purge it ---------------------------------------------------------------
@@ -524,8 +529,178 @@ install_particld(){
 }
 
 update_particld(){
-     echo -e "${C_RED}${messages["not_implemented"]} -- ${messages["exiting"]}$C_NORM"
-     exit 1
+
+    if [ $LATEST_VERSION != $CURRENT_VERSION ] || [ ! -z "$REINSTALL" ] ; then
+
+        if [ ! -z "$REINSTALL" ];then
+            echo -e ""
+            echo -e "$C_GREEN*** ${messages["particl_version"]} $CURRENT_VERSION is up-to-date. ***$C_NORM"
+            echo -e ""
+            echo -en
+
+            pending "${messages["reinstall_to"]} $INSTALL_DIR$C_NORM?"
+        else
+            echo -e ""
+            echo -e "$C_RED*** ${messages["newer_particl_available"]} ***$C_NORM"
+            echo -e ""
+            echo -e "${messages["currnt_version"]} $C_RED$CURRENT_VERSION$C_NORM"
+            echo -e "${messages["latest_version"]} $C_GREEN$LATEST_VERSION$C_NORM"
+            echo -e ""
+            if [ -z "$UNATTENDED" ] ; then
+                pending "${messages["download"]} $DOWNLOAD_URL\n${messages["and_install_to"]} $INSTALL_DIR?"
+            else
+                echo -e "$C_GREEN*** UNATTENDED MODE ***$C_NORM"
+            fi
+        fi
+
+
+        if [ -z "$UNATTENDED" ] ; then
+            if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
+                echo -e "${C_RED}${messages["exiting"]}$C_NORM"
+                echo ""
+                exit 0
+            fi
+        fi
+
+        # push it ----------------------------------------------------------------
+
+        cd $INSTALL_DIR
+
+        # pull it ----------------------------------------------------------------
+
+        pending " --> ${messages["downloading"]} ${DOWNLOAD_URL}... "
+        tput sc
+        echo -e "$C_CYAN"
+        $wget_cmd -O - $DOWNLOAD_URL | pv -trep -s27M -w80 -N wallet > $DOWNLOAD_FILE
+        $wget_cmd -O - https://raw.githubusercontent.com/particl/gitian.sigs/master/$LATEST_VERSION.0-linux/tecnovert/particl-linux-$LATEST_VERSION-build.assert | pv -trep -w80 -N checksums > ${DOWNLOAD_FILE}.DIGESTS.txt
+        echo -ne "$C_NORM"
+        clear_n_lines 2
+        tput rc
+        clear_n_lines 3
+        if [ ! -e $DOWNLOAD_FILE ] ; then
+            echo -e "${C_RED}error ${messages["downloading"]} file"
+            echo -e "tried to get $DOWNLOAD_URL$C_NORM"
+            exit 1
+        else
+            ok ${messages["done"]}
+        fi
+
+        # prove it ---------------------------------------------------------------
+
+        pending " --> ${messages["checksumming"]} ${DOWNLOAD_FILE}... "
+        SHA256SUM=$( sha256sum $DOWNLOAD_FILE )
+        SHA256PASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS.txt | wc -l )
+        if [ $SHA256PASS -lt 1 ] ; then
+            $wget_cmd -O - https://api.github.com/repos/particl/particl-core/releases | jq -r .[0] | jq .body > ${DOWNLOAD_FILE}.DIGESTS2.txt
+            SHA256DLPASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS2.txt | wc -l )
+            if [ $SHA256DLPASS -lt 1 ] ; then
+                echo -e " ${C_RED} SHA256 ${messages["checksum"]} ${messages["FAILED"]} ${messages["try_again_later"]} ${messages["exiting"]}$C_NORM"
+                exit 1
+            fi
+        fi
+        ok "${messages["done"]}"
+
+        # produce it -------------------------------------------------------------
+
+        pending " --> ${messages["unpacking"]} ${DOWNLOAD_FILE}... " && \
+        tar zxf $DOWNLOAD_FILE && \
+        ok "${messages["done"]}"
+
+        # pummel it --------------------------------------------------------------
+
+        if [ $PARTYD_RUNNING == 1 ]; then
+            pending " --> ${messages["stopping"]} partcld. ${messages["please_wait"]}"
+            $PARTY_CLI stop >/dev/null 2>&1
+            sleep 15
+            killall -9 particld particl-shutoff >/dev/null 2>&1
+            ok "${messages["done"]}"
+        fi
+
+        # prune it ---------------------------------------------------------------
+
+        pending " --> ${messages["removing_old_version"]}"
+        rm -rf \
+            particld \
+            particld-$CURRENT_VERSION \
+            particl-qt \
+            particl-qt-$CURRENT_VERSION \
+            particl-cli \
+            particl-cli-$CURRENT_VERSION
+        rm -rf \
+	    "$DATA_DIR"/banlist.dat \
+            "$DATA_DIR"/peers.dat
+        ok "${messages["done"]}"
+
+        # place it ---------------------------------------------------------------
+
+        mv particl-$LATEST_VERSION/bin/particld particld-$LATEST_VERSION
+        mv particl-$LATEST_VERSION/bin/particl-cli particl-cli-$LATEST_VERSION
+        if [ $ARM != 1 ];then
+            mv particl-$LATEST_VERSION/bin/particl-qt particl-qt-$LATEST_VERSION
+        fi
+        ln -s particld-$LATEST_VERSION particld
+        ln -s particl-cli-$LATEST_VERSION particl-cli
+        if [ $ARM != 1 ];then
+            ln -s particl-qt-$LATEST_VERSION particl-qt
+        fi
+
+        # permission it ----------------------------------------------------------
+
+        if [ ! -z "$SUDO_USER" ]; then
+            chown -h $USER:$USER {$DOWNLOAD_FILE,${DOWNLOAD_FILE}.DIGESTS.txt,particl-cli,particld,particl-qt,particl*$LATEST_VERSION}
+        fi
+
+        # purge it ---------------------------------------------------------------
+
+        rm -rf particl-$LATEST_VERSION
+
+        # punch it ---------------------------------------------------------------
+
+        pending " --> ${messages["launching"]} particld... "
+        $INSTALL_DIR/particld -daemon 2>&1> /dev/null
+        ok "${messages["done"]}"
+
+        # probe it ---------------------------------------------------------------
+
+        pending " --> ${messages["waiting_for_particld_to_respond"]}"
+        echo -en "${C_YELLOW}"
+        PARTYD_RUNNING=1
+        while [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_RESPONDING == 0 ]; do
+            echo -n "."
+            _check_particld_state
+            sleep 5
+        done
+        if [ $PARTYD_RUNNING == 0 ]; then
+            die "\n - particld unexpectedly quit. ${messages["exiting"]}"
+        fi
+        ok "${messages["done"]}"
+
+        # poll it ----------------------------------------------------------------
+
+        LAST_VERSION=$CURRENT_VERSION
+        _get_versions
+
+        # pass or punt -----------------------------------------------------------
+
+        if [ $LATEST_VERSION == $CURRENT_VERSION ]; then
+            echo -e ""
+            echo -e "${C_GREEN}${messages["successfully_upgraded"]} ${LATEST_VERSION}$C_NORM"
+
+            echo -e ""
+            echo -e "${C_GREEN}${messages["installed_in"]} ${INSTALL_DIR}$C_NORM"
+            echo -e ""
+            ls -l --color {$DOWNLOAD_FILE,${DOWNLOAD_FILE}.DIGESTS.txt,particl-cli,particld,particl-qt,particl*$LATEST_VERSION}
+            echo -e ""
+
+	    quit
+        else
+            echo -e "${C_RED}${messages["dash_version"]} $CURRENT_VERSION ${messages["is_not_uptodate"]} ($LATEST_VERSION) ${messages["exiting"]}$C_NORM"
+        fi
+    else
+        echo -e ""
+        echo -e "${C_GREEN}${messages["particl_version"]} $CURRENT_VERSION ${messages["is_not_uptodate"]} ($LATEST_VERSION) ${messages["exiting"]}$C_NORM"
+    fi
+    exit 0
 }
 
 stakingnode_walletinit(){
@@ -640,6 +815,66 @@ stakingnode_info(){
         if [ $FOUNDSTAKINGNODEKEY == 0 ] || [ -z $FOUNDSTAKINGNODEKEY ]; then
             die " - no staking node public keys found, please type 'partyman stakingnode new' to create one. ${messages["exiting"]}"
         fi
+    else
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
+    fi
+
+}
+
+stakingnode_stats(){
+
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
+        if $PARTY_CLI extkey account > /dev/null 2>&1; then
+            ok "${messages["done"]}"
+        else
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
+        fi
+        if [ ! $LATEST_VERSION == $CURRENT_VERSION ]; then
+            die "\n - please upgrade to the latest version! ${messages["exiting"]}"
+        fi
+
+        DATE=$(date -u +%d-%m-%Y)
+        DAY=$(date -u +%d)
+        MONTH=$(date -u +%m)
+        YEAR=$(date -u +%Y)
+
+        COUNTER=1
+
+        pending " --> ${messages["stakingnode_stats_daily"]}"
+        ok "${messages["done"]}"
+        echo
+        printf '%-4s %-15s %-30s %-12s\n' \
+        "${messages["stakingnode_stats_indent"]}" "DAY" "# STAKES" "TOTAL STAKED"
+
+        until [ $COUNTER -gt $DAY ]; do
+            NUMBER_OF_STAKES=$( $PARTY_CLI filtertransactions "{\"from\":\"$YEAR-$MONTH-$COUNTER\", \"to\":\"$YEAR-$MONTH-$COUNTER\",\"count\":100000,\"category\":\"stake\",\"collate\":true,\"include_watchonly\":true,\"with_reward\":true}" | jq .collated.records)
+            STAKE_AMOUNT=$( $PARTY_CLI filtertransactions "{\"from\":\"$YEAR-$MONTH-$COUNTER\", \"to\":\"$YEAR-$MONTH-$COUNTER\",\"count\":100000,\"category\":\"stake\",\"collate\":true,\"include_watchonly\":true,\"with_reward\":true}" | jq .collated.total_reward)
+
+            printf '%-4s %-15s %-30s %-12s\n' \
+            "${messages["stakingnode_stats_indent"]}" "$COUNTER" "$NUMBER_OF_STAKES" "$STAKE_AMOUNT"
+	    COUNTER=$((COUNTER+1))
+        done
+
+        echo
+        pending " --> ${messages["stakingnode_stats_monthly"]}"
+        ok "${messages["done"]}"
+        echo
+        printf '%-4s %-15s %-30s %-12s\n' \
+        "${messages["stakingnode_stats_indent"]}" "MONTH" "# STAKES" "TOTAL STAKED"
+
+        COUNTER=1
+        until [ $COUNTER -gt $MONTH ]; do
+            NUMBER_OF_STAKES=$( $PARTY_CLI filtertransactions "{\"from\":\"$YEAR-$COUNTER\", \"to\":\"$YEAR-$COUNTER\",\"count\":100000,\"category\":\"stake\",\"collate\":true,\"include_watchonly\":true,\"with_reward\":true}" | jq .collated.records)
+            STAKE_AMOUNT=$( $PARTY_CLI filtertransactions "{\"from\":\"$YEAR-$COUNTER\", \"to\":\"$YEAR-$COUNTER\",\"count\":100000,\"category\":\"stake\",\"collate\":true,\"include_watchonly\":true,\"with_reward\":true}" | jq .collated.total_reward)
+            #echo "bah" $NUMBER_OF_STAKES
+            if [[ $NUMBER_OF_STAKES != 0 ]] && [[ $STAKE_AMOUNT != 0 ]]; then
+                printf '%-4s %-15s %-30s %-12s\n' \
+                "${messages["stakingnode_stats_indent"]}" "$COUNTER" "$NUMBER_OF_STAKES" "$STAKE_AMOUNT"
+            fi
+            COUNTER=$((COUNTER+1))
+        done
+
     else
         die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
     fi
@@ -789,7 +1024,7 @@ print_status() {
     pending "${messages["status_uptimeh"]}" ; ok "$HOST_UPTIME_DAYS ${messages["days"]}, $HOST_LOAD_AVERAGE"
     pending "${messages["status_particldip"]}" ; [ $PUBLIC_IPV4 != 'none' ] && ok "$PUBLIC_IPV4" || err "$PUBLIC_IPV4"
     pending "${messages["status_particldve"]}" ; ok "$CURRENT_VERSION"
-    pending "${messages["status_uptodat"]}" ; [ $PARTYD_UP_TO_DATE -gt 0 ] && ok "${messages["YES"]}" || err "$PARTYD_UP_TO_DATE_STATUS"
+    pending "${messages["status_uptodat"]}" ; [ $PARTYD_UP_TO_DATE -gt 0 ] && ok "${messages["YES"]}" || err "$PARTYD_UP_TO_DATE_STATUS ($LATEST_VERSION)"
     pending "${messages["status_running"]}" ; [ $PARTYD_HASPID     -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_uptimed"]}" ; [ $PARTYD_UPTIME    -gt 0 ] && ok "$(displaytime $PARTYD_UPTIME)" || err "${messages["NO"]}"
     pending "${messages["status_drespon"]}" ; [ $PARTYD_RUNNING    -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
