@@ -71,17 +71,18 @@ messages=(
     ["commands"]="COMMANDS"
     ["usage_title"]="installs, updates, and manages single-user particl daemons and wallets"
     ["usage_install_description"]="installs, updates, and manages single-user particl daemons and wallets"
-    ["usage_update_description"]="updates particl to latest version and restarts (pending)"
+    ["usage_update_description"]="updates particl to latest version and restarts"
     ["usage_restart_description"]="restarts particld and deletes:"
     ["usage_restart_description_now"]="will prompt user if not given the 'now' argument"
     ["usage_status_description"]="polls local and web sources and displays current status"
     ["usage_sync_description"]="updates partyman to latest github version"
     ["usage_branch_description"]="switch partyman to an alternate/experimental github branch"
-    ["usage_reinstall_description"]="overwrites particl with latest version and restarts (pending)"
+    ["usage_reinstall_description"]="overwrites particl with latest version and restarts"
     ["usage_version_description"]="prints partymans version number and exits"
     ["usage_stakingnode_description"]="displays current public keys on this staking nodes particl daemon"
     ["usage_stakingnode_init_description"]="[init] creates a new wallet"
     ["usage_stakingnode_new_description"]="[new] creates a new public key to use with your cold staking wallet"
+    ["usage_stakingnode_stats_description"]="[stats] shows stakingnode earnings"
 
 
 

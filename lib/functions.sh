@@ -82,11 +82,12 @@ usage(){
 
             ${messages["usage_restart_description_now"]}
 
-	stakingnode [init, new]
+	stakingnode [init, new, stats]
 
 	    ${messages["usage_stakingnode_description"]}
 	    ${messages["usage_stakingnode_init_description"]}
 	    ${messages["usage_stakingnode_new_description"]}
+            ${messages["usage_stakingnode_stats_description"]}
 
         status
 
