@@ -1,5 +1,26 @@
 Manage your "partyman" web server.
 
+Step 1
+Setup Cron Job
+
+`*/10 * * * * /bin/bash /home/particl/partyman/webserver/scripts/cron.sh`
+
+Make sure to set the correct path to the wile based on your setup.
+
+Step 2
+Firewall
+
+The webserver comes with a basic built-in firewall. You can configure it inside the `/webserver/` directory.
+`hosts.allow` file
+
+* Add one IP Address per line to whitelist
+* DEFAULT POLICY = DENY
+* Set hosts.allow file to empty to change DEFAULY POLICY = ALLOW
+
+
+Step 3
+Start the web-server!
+
 usage: ./webserver <command> [<hostname>:<port>]
 
 Available commands:
@@ -8,13 +29,3 @@ Available commands:
   stop      Stops the built-in web server
   restart   Stops and Starts on previously specified hostname:port
   status    Status of the process
-
-
-###############
-
-Basic IP Protection
-
-hosts.allow file
-* Add one IP Address per line to whitelist.
-
-By default it denies access (remove the default 255.255.255.255 rule before adding your own).
