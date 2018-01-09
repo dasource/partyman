@@ -1,0 +1,20 @@
+Manage your "partyman" web server.
+
+usage: ./webserver <command> [<hostname>:<port>]
+
+Available commands:
+
+  start     Starts built-in web server server on specified hostname:port, default is 0.0.0.0:8080  
+  stop      Stops the built-in web server
+  restart   Stops and Starts on previously specified hostname:port
+  status    Status of the process
+
+
+###############
+
+Basic IP Protection
+
+hosts.allow file
+* Add one IP Address per line to whitelist.
+
+By default it denies access (remove the default 255.255.255.255 rule before adding your own).

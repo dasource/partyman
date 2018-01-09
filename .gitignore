@@ -1,1 +1,5 @@
 *.pyc
+webserver/webserver.log
+webserver/webserver.pid
+webserver/public_html/partyman-status
+webserver/public_html/partyman-status.tmp
