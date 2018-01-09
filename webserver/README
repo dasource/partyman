@@ -1,17 +1,20 @@
 Manage your "partyman" web server.
 
 Step 1
+------
 Setup Cron Job
 
-`*/10 * * * * /bin/bash /home/particl/partyman/webserver/scripts/cron.sh`
+'*/10 * * * * /bin/bash /home/particl/partyman/webserver/scripts/cron.sh'
 
-Make sure to set the correct path to the wile based on your setup.
+Make sure to set the correct path to the 'cron.sh' file based on your setup.
+
 
 Step 2
+------
 Firewall
 
-The webserver comes with a basic built-in firewall. You can configure it inside the `/webserver/` directory.
-`hosts.allow` file
+The webserver comes with a basic built-in firewall. You can configure it inside the '/webserver/' directory.
+'hosts.allow' file
 
 * Add one IP Address per line to whitelist
 * DEFAULT POLICY = DENY
@@ -19,9 +22,10 @@ The webserver comes with a basic built-in firewall. You can configure it inside 
 
 
 Step 3
+------
 Start the web-server!
 
-usage: ./webserver <command> [<hostname>:<port>]
+usage: './webserver <command> [<hostname>:<port>]'
 
 Available commands:
 
