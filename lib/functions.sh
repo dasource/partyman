@@ -213,12 +213,17 @@ _find_particl_directory() {
 
 
 _check_partyman_updates() {
-    GITHUB_PARTYMAN_VERSION=$( $curl_cmd https://raw.githubusercontent.com/dasource/partyman/master/VERSION )
-    if [ ! -z "$GITHUB_PARTYMAN_VERSION" ] && [ "$PARTYMAN_VERSION" != "$GITHUB_PARTYMAN_VERSION" ]; then
-        echo -e "\n"
-        echo -e "${C_RED}${0##*/} ${messages["requires_updating"]} $C_GREEN$GITHUB_PARTYMAN_VERSION$C_RED\n${messages["requires_sync"]}$C_NORM\n"
+    GITHUB_PARTYMAN_VERSION=$( $curl_cmd -i https://raw.githubusercontent.com/dasource/partyman/master/VERSION 2>/dev/null | head -n 1 | cut -d$' ' -f2 )
+    if [ "$GITHUB_PARTYMAN_VERSION" == 200 ]; then # check to make sure github is returning the data
+        GITHUB_PARTYMAN_VERSION=$( $curl_cmd https://raw.githubusercontent.com/dasource/partyman/master/VERSION 2>/dev/null )
+        if [ ! -z "$GITHUB_PARTYMAN_VERSION" ] && [ "$PARTYMAN_VERSION" != "$GITHUB_PARTYMAN_VERSION" ]; then
+            echo -e "\n"
+            echo -e "${C_RED}${0##*/} ${messages["requires_updating"]} $C_GREEN$GITHUB_PARTYMAN_VERSION$C_RED\n${messages["requires_sync"]}$C_NORM\n"
 
-        die "${messages["exiting"]}"
+            die "${messages["exiting"]}"
+        fi
+    else
+        GITHUB_PARTYMAN_VERSION=$PARTYMAN_VERSION # force to local version during github issues
     fi
 }
 
@@ -263,10 +268,10 @@ _get_versions() {
 
     LVCOUNTER=0
     while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
-        PR=$(curl -s https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq .prerelease)
+        PR=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq .prerelease)
 	if [ "$PR" == "false" ]; then
-	    LATEST_VERSION=$(curl -s https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq -r .tag_name | sed 's/v//g')
-	fi 
+	    LATEST_VERSION=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq -r .tag_name | sed 's/v//g')
+	fi
         let LVCOUNTER=LVCOUNTER+1
     done
 
