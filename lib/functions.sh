@@ -962,7 +962,8 @@ get_particld_status(){
 
 	#Hack for floating point arithmetic 
         STAKEWEIGHTPERCENTAGE=$( awk "BEGIN {printf \"%.3f%%\", $PARTYD_STAKEWEIGHT/$PARTYD_NETSTAKEWEIGHT*100}" )
-        PARTYD_STAKEWEIGHTLINE="$PARTYD_STAKEWEIGHT ($STAKEWEIGHTPERCENTAGE)"
+	T_PARTYD_STAKEWEIGHT=$(printf "%'.0f" $PARTYD_STAKEWEIGHT)
+        PARTYD_STAKEWEIGHTLINE="$T_PARTYD_STAKEWEIGHT ($STAKEWEIGHTPERCENTAGE)"
 
         PARTYD_GETCOLDSTAKINGINFO=`$PARTY_CLI getcoldstakinginfo 2>/dev/null`;
         CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
