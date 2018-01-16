@@ -912,12 +912,12 @@ get_particld_status(){
     if [ -z "$PARTYD_CURRENT_BLOCK" ] ; then PARTYD_CURRENT_BLOCK=0 ; fi
 
 
-    WEB_BLOCK_COUNT_CHAINZ=$($curl_cmd https://chainz.cryptoid.info/part/api.dws?q=getblockcount | jq -r .);
+    WEB_BLOCK_COUNT_CHAINZ=$($curl_cmd https://chainz.cryptoid.info/part/api.dws?q=getblockcount 2>/dev/null | jq -r .);
     if [ -z "$WEB_BLOCK_COUNT_CHAINZ" ]; then
         WEB_BLOCK_COUNT_CHAINZ=0
     fi
 
-    WEB_BLOCK_COUNT_PART=$($curl_cmd https://explorer.particl.io/particl-insight-api/sync | jq -r .blockChainHeight)
+    WEB_BLOCK_COUNT_PART=$($curl_cmd https://explorer.particl.io/particl-insight-api/sync 2>/dev/null | jq -r .blockChainHeight)
     if [ -z "$WEB_BLOCK_COUNT_PART" ]; then
         WEB_BLOCK_COUNT_PART=0
     fi
@@ -956,6 +956,17 @@ get_particld_status(){
     	STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g')
     	PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g')
     	PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g')
+
+        PARTYD_NETSTAKEWEIGHT=$(($PARTYD_NETSTAKEWEIGHT / 100000000))
+        PARTYD_STAKEWEIGHT=$(($PARTYD_STAKEWEIGHT / 100000000))
+
+	#Hack for floating point arithmetic 
+        STAKEWEIGHTPERCENTAGE=$( awk "BEGIN {printf \"%.3f%%\", $PARTYD_STAKEWEIGHT/$PARTYD_NETSTAKEWEIGHT*100}" )
+        PARTYD_STAKEWEIGHTLINE="$PARTYD_STAKEWEIGHT ($STAKEWEIGHTPERCENTAGE)"
+
+        PARTYD_GETCOLDSTAKINGINFO=`$PARTY_CLI getcoldstakinginfo 2>/dev/null`;
+        CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
+        CSTAKING_CURRENT=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep currently_staking | awk '{print $2}' | sed -e 's/[",]//g')
     fi
 }
 
@@ -1044,9 +1055,12 @@ print_status() {
     if [ $PARTYD_RUNNING == 1 ]; then
     	pending "${messages["breakline"]}" ; ok ""
     	pending "${messages["status_stakeen"]}" ; [ $STAKING_ENABLED -gt 0 ] && ok "${messages["YES"]} - $STAKING_PERCENTAGE%" || err "${messages["NO"]}"
+        pending "${messages["status_stakedi"]}" ; ok $(printf "%'.0f" $STAKING_DIFF)
+        pending "${messages["status_stakenw"]}" ; ok $(printf "%'.0f" $PARTYD_NETSTAKEWEIGHT)
+	pending "${messages["breakline"]}" ; ok ""
     	pending "${messages["status_stakecu"]}" ; [ $STAKING_CURRENT -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]} - "$STAKING_STATUS
-    	pending "${messages["status_stakedi"]}" ; ok "$STAKING_DIFF"
-    	pending "${messages["status_stakewe"]}" ; ok "$PARTYD_STAKEWEIGHT / $PARTYD_NETSTAKEWEIGHT"
+        pending "${messages["status_stakeww"]}" ; ok "$PARTYD_STAKEWEIGHTLINE"
+
     fi
 }
 
@@ -1059,5 +1073,5 @@ show_message_configure() {
 }
 
 get_public_ips() {
-    PUBLIC_IPV4=$($curl_cmd -4 https://icanhazip.com/)
+    PUBLIC_IPV4=$(dig +short myip.opendns.com @resolver1.opendns.com)
 }

@@ -116,14 +116,15 @@ messages=(
     ["status_webpart"]="             (explorer.particl.io) : "
     ["status_webchai"]="             (chainz)              : "
 
-    ["status_dcurdif"]="  particld current difficulty      : "
+    ["status_dcurdif"]="  particld current network diff    : "
 
 
 
     ["status_stakeen"]="  particld staking enabled         : "
     ["status_stakecu"]="  particld staking currently?      : "
     ["status_stakedi"]="  particld staking difficulty      : "
-    ["status_stakewe"]="  particld staking weight          : "
+    ["status_stakenw"]="  particld staking network weight  : "
+    ["status_stakeww"]="  particld staking wallet weight   : "
 
     ["ago"]=" ago"
     ["found"]="found."
