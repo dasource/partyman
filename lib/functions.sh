@@ -810,12 +810,14 @@ stakingnode_rewardaddress(){
             ok "${messages["done"]}"
             pending " --> ${messages["stakingnode_reward_found"]}"
             highlight "$REWARD_ADDRESS (Set on $REWARD_ADDRESS_DATEFORMATTED)"
-	    
-	    echo
 	else
 	    ok "${messages["done"]}"
+            pending " --> ${messages["stakingnode_reward_found"]}"
+	    highlight "default mode"
+	    echo -e "** Your wallet is configured in default mode - it will send the staking rewards back to the staking address."
 	fi
 
+	echo
         pending "Configure a new reward address?"
         if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
             echo -e "${C_RED}${messages["exiting"]}$C_NORM"
