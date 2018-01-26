@@ -9,7 +9,7 @@ Particl wallet/daemon management utilities - version 0.6
 
 To install partyman do:
 
-    sudo apt-get install python git unzip pv jq
+    sudo apt-get install python git unzip pv jq dnsutils
     cd ~ && git clone https://github.com/dasource/partyman
 
 
@@ -96,3 +96,4 @@ given the optional 'now' argument.
 * unzip
 * jq
 * particld, particl-cli
+* dnsutils
