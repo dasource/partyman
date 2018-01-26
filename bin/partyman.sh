@@ -7,6 +7,7 @@
 # Copyright (c) 2017 dasource
 
 # check we're running bash 4 -------------------------------------------------
+#set -x
 
 if [[ ${BASH_VERSION%%.*} != '4' ]];then
     die "partyman requires bash version 4. please update. exiting."
@@ -173,6 +174,23 @@ case "$1" in
 	    else
 		stakingnode_info
 	    fi
+            ;;
+        firewall)
+            COMMAND=$1
+            pending "${messages["gathering_info"]}"
+            ok " ${messages["done"]}"
+            echo
+            if [ ! -z "$2" ]; then
+                APP=$2;
+                if [ "$APP" == 'reset' ]; then
+                    firewall_reset
+                else
+                    echo "don't know how to firewall: $2"
+                fi
+            else
+                configure_firewall
+	    fi
+            quit 'Exiting.'
             ;;
         getinfo)
             COMMAND=$1

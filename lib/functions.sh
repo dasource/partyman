@@ -82,12 +82,13 @@ usage(){
 
             ${messages["usage_restart_description_now"]}
 
-	stakingnode [init, new, stats]
+	stakingnode [init, new, stats, rewardaddress]
 
 	    ${messages["usage_stakingnode_description"]}
 	    ${messages["usage_stakingnode_init_description"]}
 	    ${messages["usage_stakingnode_new_description"]}
             ${messages["usage_stakingnode_stats_description"]}
+            ${messages["usage_stakingnode_rewardaddress_description"]}
 
         status
 
@@ -128,6 +129,18 @@ _check_dependencies() {
         # only require unzip for install
         (which unzip 2>&1) >/dev/null || MISSING_DEPENDENCIES="${MISSING_DEPENDENCIES}unzip "
         (which pv   2>&1) >/dev/null || MISSING_DEPENDENCIES="${MISSING_DEPENDENCIES}pv "
+    fi
+
+    if [ "$1" == "firewall" ]; then
+        # only require for firewall
+        (which ufw  2>&1) >/dev/null || MISSING_DEPENDENCIES="${MISSING_DEPENDENCIES}ufw "
+
+        if [ ! -z "$MISSING_DEPENDENCIES" ]; then
+            err "${messages["err_missing_dependency"]} $MISSING_DEPENDENCIES\n"
+            sudo $PKG_MANAGER install $MISSING_DEPENDENCIES
+        fi
+
+        FIREWALL_CLI="sudo ufw"
     fi
 
     # make sure we have the right netcat version (-4,-6 flags)
@@ -928,7 +941,6 @@ stakingnode_stats(){
         until [ $COUNTER -gt $MONTH ]; do
             NUMBER_OF_STAKES=$( $PARTY_CLI filtertransactions "{\"from\":\"$YEAR-$COUNTER\", \"to\":\"$YEAR-$COUNTER\",\"count\":100000,\"category\":\"stake\",\"collate\":true,\"include_watchonly\":true,\"with_reward\":true}" | jq .collated.records)
             STAKE_AMOUNT=$( $PARTY_CLI filtertransactions "{\"from\":\"$YEAR-$COUNTER\", \"to\":\"$YEAR-$COUNTER\",\"count\":100000,\"category\":\"stake\",\"collate\":true,\"include_watchonly\":true,\"with_reward\":true}" | jq .collated.total_reward)
-            #echo "bah" $NUMBER_OF_STAKES
             if [[ $NUMBER_OF_STAKES != 0 ]] && [[ $STAKE_AMOUNT != 0 ]]; then
                 printf '%-4s %-15s %-30s %-12s\n' \
                 "${messages["stakingnode_stats_indent"]}" "$COUNTER" "$NUMBER_OF_STAKES" "$STAKE_AMOUNT"
@@ -940,6 +952,69 @@ stakingnode_stats(){
         die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
     fi
 
+}
+
+configure_firewall(){
+
+    UFW_STATUS=$(sudo ufw status | head -n 1 | cut -d' ' -f2)
+    pending " --> ${messages["firewall_status"]}"
+    ok " $UFW_STATUS"
+
+    if [ "$UFW_STATUS" == "inactive" ]; then
+        echo
+        pending "Configure default firewall?"
+        if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
+            echo -e "${C_RED}${messages["exiting"]}$C_NORM"
+            echo ""
+            exit 0
+        fi
+
+        pending " --> ${messages["firewall_configure"]}"
+	echo
+	SSH_PORT=$(echo ${SSH_CLIENT##* })
+	if [ -z "$SSH_PORT" ] ; then SSH_PORT=22 ; fi 
+
+        # creates a minimal set of firewall rules that allows INBOUND masternode p2p & SSH ports */
+	# disallow everything except ssh, 8080 (webserver) and inbound ports 51738 and 51938
+	$FIREWALL_CLI default deny
+	$FIREWALL_CLI logging on
+	$FIREWALL_CLI allow $SSH_PORT/tcp
+        $FIREWALL_CLI allow 8080/tcp comment 'partyman webserver'
+	$FIREWALL_CLI allow 51738/tcp comment 'particl p2p mainnet'
+        $FIREWALL_CLI allow 51938/tcp comment 'particl p2p testnet'
+
+	# This will only allow 6 connections every 30 seconds from the same IP address.
+	$FIREWALL_CLI limit OpenSSH
+	$FIREWALL_CLI --force enable
+        ok "${messages["done"]}"
+    fi
+
+        pending " --> ${messages["firewall_report"]}"
+	echo
+	$FIREWALL_CLI status
+}
+
+firewall_reset(){
+
+    UFW_STATUS=$(sudo ufw status | head -n 1 | cut -d' ' -f2)
+    pending " --> ${messages["firewall_status"]}"
+    ok " $UFW_STATUS"
+
+    if [ "$UFW_STATUS" == "active" ]; then
+        echo
+        pending "Reset and disable firewall?"
+        if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
+            echo -e "${C_RED}${messages["exiting"]}$C_NORM"
+            echo ""
+            exit 0
+        fi
+
+	ok ""
+        echo "y" | $FIREWALL_CLI reset
+        UFW_STATUS=$(sudo ufw status | head -n 1 | cut -d' ' -f2)
+        pending " --> ${messages["firewall_status"]}"
+        ok " $UFW_STATUS"
+    fi
 }
 
 _get_particld_proc_status(){

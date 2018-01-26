@@ -83,7 +83,7 @@ messages=(
     ["usage_stakingnode_init_description"]="[init] creates a new wallet"
     ["usage_stakingnode_new_description"]="[new] creates a new public key to use with your cold staking wallet"
     ["usage_stakingnode_stats_description"]="[stats] shows stakingnode earnings"
-
+    ["usage_stakingnode_rewardaddress_description"]="[rewardaddress] configure particl address for staking rewards"
 
 
     ["to_start_particl"]="To start particld run:"
@@ -141,4 +141,9 @@ messages=(
     ["stakingnode_stats_daily"]="getting stats for current month ... "
     ["stakingnode_stats_monthly"]="getting stats for entire year ... "
     ["stakingnode_stats_indent"]="   "
+
+    ["firewall_status"]="checking status of firewall ..."
+    ["firewall_configure"]="configuring firewall ..."
+    ["firewall_report"]="generating firewall status report ..."
+
 )
