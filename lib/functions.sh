@@ -789,6 +789,56 @@ stakingnode_newpublickey(){
 
 }
 
+stakingnode_rewardaddress(){
+
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
+        if $PARTY_CLI extkey account > /dev/null 2>&1; then
+            ok "${messages["done"]}"
+        else
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
+        fi
+
+        echo
+
+        pending " --> ${messages["stakingnode_reward_check"]}"
+	CHECK_REWARD_ADDRESS=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions)
+	if [ ! "$CHECK_REWARD_ADDRESS" == "default" ] ; then 
+	    REWARD_ADDRESS=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions.rewardaddress)
+            ok "${messages["done"]}"
+            pending " --> ${messages["stakingnode_reward_found"]}"
+            highlight "$REWARD_ADDRESS"
+	    echo
+	else
+	    ok "${messages["done"]}"
+	fi
+
+        pending "Configure a new reward address?"
+        if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
+            echo -e "${C_RED}${messages["exiting"]}$C_NORM"
+            echo ""
+            exit 0
+        fi
+
+        pending "Particl Address to send all rewards to : "
+        read rewardAddress
+
+        echo
+        pending " --> ${messages["stakingnode_reward_address"]}"
+	echo
+        if $PARTY_CLI walletsettings stakingoptions "{\"rewardaddress\":\"$rewardAddress\"}"; then
+            ok ""
+        else
+            die "\n - error setting the reward address! ' ${messages["exiting"]}"
+        fi
+    else
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
+    fi
+
+
+}
+
+
 stakingnode_info(){
 
     if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then

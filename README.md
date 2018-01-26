@@ -57,6 +57,9 @@ To get staking stats for this staking node, do:
 
     partyman/partyman stakingnode stats
 
+To configure the reward address for this staking node, do:
+
+    partyman/partyman stakingnode rewardaddress
 
 
 
