@@ -805,9 +805,12 @@ stakingnode_rewardaddress(){
 	CHECK_REWARD_ADDRESS=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions)
 	if [ ! "$CHECK_REWARD_ADDRESS" == "default" ] ; then 
 	    REWARD_ADDRESS=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions.rewardaddress)
+	    REWARD_ADDRESS_DATE=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions.time)
+	    REWARD_ADDRESS_DATEFORMATTED=$(stamp2date $REWARD_ADDRESS_DATE)
             ok "${messages["done"]}"
             pending " --> ${messages["stakingnode_reward_found"]}"
-            highlight "$REWARD_ADDRESS"
+            highlight "$REWARD_ADDRESS (Set on $REWARD_ADDRESS_DATEFORMATTED)"
+	    
 	    echo
 	else
 	    ok "${messages["done"]}"
