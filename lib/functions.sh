@@ -134,12 +134,6 @@ _check_dependencies() {
     if [ "$1" == "firewall" ]; then
         # only require for firewall
         (which ufw  2>&1) >/dev/null || MISSING_DEPENDENCIES="${MISSING_DEPENDENCIES}ufw "
-
-        if [ ! -z "$MISSING_DEPENDENCIES" ]; then
-            err "${messages["err_missing_dependency"]} $MISSING_DEPENDENCIES\n"
-            sudo $PKG_MANAGER install $MISSING_DEPENDENCIES
-        fi
-
         FIREWALL_CLI="sudo ufw"
     fi
 
@@ -157,8 +151,6 @@ _check_dependencies() {
         err "${messages["err_missing_dependency"]} $MISSING_DEPENDENCIES\n"
         sudo $PKG_MANAGER install $MISSING_DEPENDENCIES
     fi
-
-
 }
 
 # attempt to locate particl-cli executable.
@@ -1099,6 +1091,7 @@ get_particld_status(){
         PARTYD_GETCOLDSTAKINGINFO=`$PARTY_CLI getcoldstakinginfo 2>/dev/null`;
         CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
         CSTAKING_CURRENT=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep currently_staking | awk '{print $2}' | sed -e 's/[",]//g')
+        CSTAKING_BALANCE=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep coin_in_coldstakeable_script | awk '{print $2}' | sed -e 's/[",]//g')
     fi
 }
 
@@ -1192,6 +1185,7 @@ print_status() {
 	pending "${messages["breakline"]}" ; ok ""
     	pending "${messages["status_stakecu"]}" ; [ $STAKING_CURRENT -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]} - "$STAKING_STATUS
         pending "${messages["status_stakeww"]}" ; ok "$PARTYD_STAKEWEIGHTLINE"
+        pending "${messages["status_stakebl"]}" ; ok $(printf "%'.0f" $CSTAKING_BALANCE)
 
     fi
 }

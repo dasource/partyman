@@ -125,6 +125,7 @@ messages=(
     ["status_stakedi"]="  particld staking difficulty      : "
     ["status_stakenw"]="  particld staking network weight  : "
     ["status_stakeww"]="  particld staking wallet weight   : "
+    ["status_stakebl"]="  particld coldstaking balance     : "
 
     ["ago"]=" ago"
     ["found"]="found."
