@@ -299,7 +299,9 @@ _check_particld_state() {
     fi
     if [ $( $PARTY_CLI help 2>/dev/null | wc -l ) -gt 0 ]; then
         PARTYD_RESPONDING=1
-        PARTYD_WALLET=$( $PARTY_CLI getwalletinfo | jq -r .encryptionstatus )
+        PARTYD_WALLETSTATUS=$( $PARTY_CLI getwalletinfo | jq -r .encryptionstatus )
+        PARTYD_WALLET=$( $PARTY_CLI getwalletinfo | jq -r .hdmasterkeyid )
+        PARTYD_TBALANCE=$( $PARTY_CLI getwalletinfo | jq -r .total_balance )
     fi
 }
 
@@ -716,9 +718,10 @@ update_particld(){
 
 stakingnode_walletinit(){
 
-    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
+    echo $PARTYD_WALLET
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLETSTATUS != "Locked" ]; then
 	pending " --> ${messages["stakingnode_init_walletcheck"]}"
-	if $PARTY_CLI extkey account > /dev/null 2>&1; then
+	if [ ! $PARTYD_WALLET  == "null" ]; then
             die "\n - wallet already exists - 'partyman stakingnode' to view list of current staking node public keys or 'partyman stakingnode new' to create a new staking node public key. ${messages["exiting"]}"
 	else
 	    ok "${messages["done"]}"
@@ -760,12 +763,15 @@ stakingnode_walletinit(){
 
 stakingnode_newpublickey(){
 
-    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLETSTATUS != "Locked" ]; then
         pending " --> ${messages["stakingnode_init_walletcheck"]}"
-        if $PARTY_CLI extkey account > /dev/null 2>&1; then
+        if [ ! $PARTYD_WALLET  == "null" ]; then
 	    ok "${messages["done"]}"
 	else
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
+        fi
+        if [ $PARTYD_TBALANCE > 0 ]; then
+            die "\n - WOAH holdup! you cannot setup coldstaking on a hotstaking wallet! ${messages["exiting"]}"
         fi
 
         echo
@@ -796,14 +802,16 @@ stakingnode_newpublickey(){
 
 stakingnode_rewardaddress(){
 
-    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLETSTATUS != "Locked" ]; then
         pending " --> ${messages["stakingnode_init_walletcheck"]}"
-        if $PARTY_CLI extkey account > /dev/null 2>&1; then
+        if [ ! $PARTYD_WALLET  == "null" ]; then
             ok "${messages["done"]}"
         else
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
-
+        if [ $PARTYD_TBALANCE > 0 ]; then
+            die "\n -  WOAH holdup! you cannot setup coldstaking on a hotstaking wallet! ${messages["exiting"]}"
+        fi
         echo
 
         pending " --> ${messages["stakingnode_reward_check"]}"
@@ -851,9 +859,9 @@ stakingnode_rewardaddress(){
 
 stakingnode_info(){
 
-    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLETSTATUS != "Locked" ]; then
         pending " --> ${messages["stakingnode_init_walletcheck"]}"
-        if $PARTY_CLI extkey account > /dev/null 2>&1; then
+        if [ ! $PARTYD_WALLET  == "null" ]; then
             ok "${messages["done"]}"
         else
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
@@ -889,9 +897,9 @@ stakingnode_info(){
 
 stakingnode_stats(){
 
-    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLET != "Locked" ]; then
+    if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLETSTATUS != "Locked" ]; then
         pending " --> ${messages["stakingnode_init_walletcheck"]}"
-        if $PARTY_CLI extkey account > /dev/null 2>&1; then
+        if [ ! $PARTYD_WALLET  == "null" ]; then
             ok "${messages["done"]}"
         else
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
