@@ -1191,7 +1191,7 @@ print_status() {
     pending "${messages["status_uptimed"]}" ; [ $PARTYD_UPTIME    -gt 0 ] && ok "$(displaytime $PARTYD_UPTIME)" || err "${messages["NO"]}"
     pending "${messages["status_drespon"]}" ; [ $PARTYD_RUNNING    -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_dlisten"]}" ; [ $PARTYD_LISTENING  -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_dportop"]}" ; [ $PUBLIC_PORT_CLOSED  -lt 1 ] && ok "${messages["YES"]}" || warn "${messages["NO"]}"
+    pending "${messages["status_dportop"]}" ; [ $PUBLIC_PORT_CLOSED  -lt 1 ] && ok "${messages["YES"]}" || highlight "${messages["NO"]}*"
     pending "${messages["status_dconnec"]}" ; [ $PARTYD_CONNECTED  -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
     pending "${messages["status_dconcnt"]}" ; [ $PARTYD_CONNECTIONS   -gt 0 ] && ok "$PARTYD_CONNECTIONS" || err "$PARTYD_CONNECTIONS"
     pending "${messages["status_dblsync"]}" ; [ $PARTYD_SYNCED     -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
@@ -1208,6 +1208,13 @@ print_status() {
         pending "${messages["status_stakeww"]}" ; ok "$PARTYD_STAKEWEIGHTLINE"
         pending "${messages["status_stakebl"]}" ; ok $(printf "%'.0f" $CSTAKING_BALANCE)
 
+    fi
+
+    if [ $PUBLIC_PORT_CLOSED  -gt 0 ]; then
+       echo
+       highlight "* Inbound P2P Port is not open - this is okay and will not affect the function of this staking node."
+       highlight "  However by opening port 51738/tcp you can provide full resources to the Particl Network by acting as a 'full node'."
+       highlight "  A 'full staking node' will increase the number of other nodes you connect to beyond the 16 limit."
     fi
 }
 
