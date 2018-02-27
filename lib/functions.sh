@@ -344,7 +344,7 @@ restart_particld(){
     ok "${messages["done"]}"
     pending " --> particl-cli getinfo"
     echo
-    $PARTY_CLI getinfo
+    $PARTY_CLI -getinfo
     echo
 
 }
@@ -1162,7 +1162,7 @@ get_host_status(){
 print_getinfo() {
 
     if [ $PARTYD_RUNNING == 1 ]; then
-	$PARTY_CLI getinfo
+	$PARTY_CLI -getinfo
 	$PARTY_CLI getwalletinfo
     fi
 }
