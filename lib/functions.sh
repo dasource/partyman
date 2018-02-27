@@ -695,7 +695,6 @@ update_particld(){
 
         # poll it ----------------------------------------------------------------
 
-        LAST_VERSION=$CURRENT_VERSION
         _get_versions
 
         # pass or punt -----------------------------------------------------------
@@ -712,11 +711,11 @@ update_particld(){
 
 	    quit
         else
-            echo -e "${C_RED}${messages["dash_version"]} $CURRENT_VERSION ${messages["is_not_uptodate"]} ($LATEST_VERSION) ${messages["exiting"]}$C_NORM"
+            echo -e "${C_RED}${messages["particl_version"]} $CURRENT_VERSION ${messages["is_not_uptodate"]} ($LATEST_VERSION) ${messages["exiting"]}$C_NORM"
         fi
     else
         echo -e ""
-        echo -e "${C_GREEN}${messages["particl_version"]} $CURRENT_VERSION ${messages["is_not_uptodate"]} ($LATEST_VERSION) ${messages["exiting"]}$C_NORM"
+        echo -e "${C_GREEN}${messages["particl_version"]} $CURRENT_VERSION ${messages["is_uptodate"]} ($LATEST_VERSION) ${messages["exiting"]}$C_NORM"
     fi
     exit 0
 }
