@@ -94,6 +94,11 @@ usage(){
 
             ${messages["usage_status_description"]}
 
+	firewall [reset]
+
+            ${messages["usage_firewall_description"]}
+            ${messages["usage_firewall_reset"]}
+
         version
 
             ${messages["usage_version_description"]}

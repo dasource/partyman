@@ -1,6 +1,6 @@
 # partyman
 
-Particl wallet/daemon management utilities - version 0.6
+Particl wallet/daemon management utilities - version 0.7
 
 * This script installs, updates, and manages single-user particl daemons and wallets
 * This script provides the ability to create a new wallet and manage staking node (cold staking functionality)
@@ -11,7 +11,6 @@ To install partyman do:
 
     sudo apt-get install python git unzip pv jq dnsutils
     cd ~ && git clone https://github.com/dasource/partyman
-
 
 To get the current status of particld, do:
 
@@ -60,6 +59,16 @@ To get staking stats for this staking node, do:
 To configure the reward address for this staking node, do:
 
     partyman/partyman stakingnode rewardaddress
+
+
+
+To install an create firewall/ufw rules to restrict access to only PORTS 22, 8080, 51738 and 51938, do:
+
+    partyman/partyman firewall
+
+To disable the firewall/ufw and reset the rules, do:
+
+    partyman/partyman firewall reset
 
 
 
