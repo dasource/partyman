@@ -774,7 +774,7 @@ stakingnode_newpublickey(){
 	else
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
-        if [ $PARTYD_TBALANCE > 0 ]; then
+        if [ $PARTYD_TBALANCE -gt 0 ]; then
             die "\n - WOAH holdup! you cannot setup coldstaking on a hotstaking wallet! ${messages["exiting"]}"
         fi
 
@@ -813,7 +813,7 @@ stakingnode_rewardaddress(){
         else
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
-        if [ $PARTYD_TBALANCE > 0 ]; then
+        if [ $PARTYD_TBALANCE -gt 0 ]; then
             die "\n -  WOAH holdup! you cannot setup coldstaking on a hotstaking wallet! ${messages["exiting"]}"
         fi
         echo
@@ -1188,7 +1188,7 @@ print_status() {
 
     pending "${messages["status_hostnam"]}" ; ok "$HOSTNAME"
     pending "${messages["status_uptimeh"]}" ; ok "$HOST_UPTIME_DAYS ${messages["days"]}, $HOST_LOAD_AVERAGE"
-    pending "${messages["status_particldip"]}" ; [ $PUBLIC_IPV4 != 'none' ] && ok "$PUBLIC_IPV4" || err "$PUBLIC_IPV4"
+    pending "${messages["status_particldip"]}" ; [ $PUBLIC_IPV4 != "none" ] && ok "$PUBLIC_IPV4" || err "$PUBLIC_IPV4"
     pending "${messages["status_particldve"]}" ; ok "$CURRENT_VERSION"
     pending "${messages["status_uptodat"]}" ; [ $PARTYD_UP_TO_DATE -gt 0 ] && ok "${messages["YES"]}" || err "$PARTYD_UP_TO_DATE_STATUS ($LATEST_VERSION)"
     pending "${messages["status_running"]}" ; [ $PARTYD_HASPID     -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
