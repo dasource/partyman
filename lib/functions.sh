@@ -325,9 +325,9 @@ restart_particld(){
 
     cd $INSTALL_DIR
 
-    rm -rf \
-        "$DATA_DIR"/banlist.dat \
-        "$DATA_DIR"/peers.dat
+    #rm -rf \
+    #    "$DATA_DIR"/banlist.dat \
+    #    "$DATA_DIR"/peers.dat
     ok "${messages["done"]}"
 
     pending " --> ${messages["starting_particld"]}"
@@ -644,9 +644,9 @@ update_particld(){
             particl-qt-$CURRENT_VERSION \
             particl-cli \
             particl-cli-$CURRENT_VERSION
-        rm -rf \
-	    "$DATA_DIR"/banlist.dat \
-            "$DATA_DIR"/peers.dat
+        #rm -rf \
+	#    "$DATA_DIR"/banlist.dat \
+        #    "$DATA_DIR"/peers.dat
         ok "${messages["done"]}"
 
         # place it ---------------------------------------------------------------
