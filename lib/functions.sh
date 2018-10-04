@@ -1098,7 +1098,9 @@ get_particld_status(){
     if [ $PARTYD_RUNNING == 1 ]; then
     	PARTYD_GETSTAKINGINFO=`$PARTY_CLI getstakinginfo 2>/dev/null`;
 	STAKING_ENABLED=$(echo "$PARTYD_GETSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
+	if [ $STAKING_ENABLED == "true" ]; then STAKING_ENABLED=1; fi
     	STAKING_CURRENT=$(echo "$PARTYD_GETSTAKINGINFO" | grep staking | awk '{print $2}' | sed -e 's/[",]//g')
+	if [ $STAKING_CURRENT == "true" ]; then STAKING_CURRENT=1; fi
     	STAKING_STATUS=$(echo "$PARTYD_GETSTAKINGINFO" | grep cause | awk '{print $2}' | sed -e 's/[",]//g')
     	STAKING_PERCENTAGE=$(echo "$PARTYD_GETSTAKINGINFO" | grep percentyearreward | awk '{print $2}' | sed -e 's/[",]//g')
     	STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g')
