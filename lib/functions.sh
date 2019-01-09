@@ -284,7 +284,7 @@ _get_versions() {
 
     LVCOUNTER=0
     while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
-        RELEASE=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null)
+        RELEASES=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null)
         PR=$( echo $RELEASES | jq .prerelease)
         if [ "$PR" == "false" ]; then
             LATEST_VERSION=$( echo $RELEASES | jq -r .tag_name | sed 's/v//g')
