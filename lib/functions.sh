@@ -284,11 +284,13 @@ _get_versions() {
 
     LVCOUNTER=0
     while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
-        PR=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq .prerelease)
+        RELEASE=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null)
+        PR=$( echo $RELEASES | jq .prerelease)
         if [ "$PR" == "false" ]; then
-            LATEST_VERSION=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null | jq -r .tag_name | sed 's/v//g')
+            LATEST_VERSION=$( echo $RELEASES | jq -r .tag_name | sed 's/v//g')
+        else
+            let LVCOUNTER=LVCOUNTER+1
         fi
-        let LVCOUNTER=LVCOUNTER+1
     done
 
     if [ -z "$LATEST_VERSION" ] && [ $COMMAND == "install" ]; then
@@ -437,7 +439,7 @@ install_particld(){
     SHA256SUM=$( sha256sum $DOWNLOAD_FILE )
     SHA256PASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS.txt | wc -l )
     if [ $SHA256PASS -lt 1 ] ; then
-        $wget_cmd -O - https://api.github.com/repos/particl/particl-core/releases | jq -r .[0] | jq .body > ${DOWNLOAD_FILE}.DIGESTS2.txt
+        $wget_cmd -O - https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] | jq .body > ${DOWNLOAD_FILE}.DIGESTS2.txt
         SHA256DLPASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS2.txt | wc -l )
         if [ $SHA256DLPASS -lt 1 ] ; then
             echo -e " ${C_RED} SHA256 ${messages["checksum"]} ${messages["FAILED"]} ${messages["try_again_later"]} ${messages["exiting"]}$C_NORM"
@@ -614,7 +616,7 @@ update_particld(){
         SHA256SUM=$( sha256sum $DOWNLOAD_FILE )
         SHA256PASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS.txt | wc -l )
         if [ $SHA256PASS -lt 1 ] ; then
-            $wget_cmd -O - https://api.github.com/repos/particl/particl-core/releases | jq -r .[0] | jq .body > ${DOWNLOAD_FILE}.DIGESTS2.txt
+            $wget_cmd -O - https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] | jq .body > ${DOWNLOAD_FILE}.DIGESTS2.txt
             SHA256DLPASS=$( grep $SHA256SUM ${DOWNLOAD_FILE}.DIGESTS2.txt | wc -l )
             if [ $SHA256DLPASS -lt 1 ] ; then
                 echo -e " ${C_RED} SHA256 ${messages["checksum"]} ${messages["FAILED"]} ${messages["try_again_later"]} ${messages["exiting"]}$C_NORM"
