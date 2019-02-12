@@ -87,6 +87,7 @@ usage(){
             ${messages["usage_stakingnode_description"]}
             ${messages["usage_stakingnode_init_description"]}
             ${messages["usage_stakingnode_new_description"]}
+            ${messages["usage_stakingnode_info_description"]}
             ${messages["usage_stakingnode_stats_description"]}
             ${messages["usage_stakingnode_rewardaddress_description"]}
 
@@ -250,23 +251,27 @@ _get_platform_info() {
             BITS=32
             ARM=0
             ARCH='i686-pc-linux-gnu'
+            QRC_ARCH='386'
             ;;
         x86_64)
             BITS=64
             ARM=0
             ARCH='x86_64-linux-gnu'
+            QRC_ARCH='amd64'
             ;;
         armv7l)
             BITS=32
             ARM=1
             BIGARM=$(grep -E "(BCM2709|Freescale i\\.MX6)" /proc/cpuinfo | wc -l)
             ARCH='arm-linux-gnueabihf'
+            QRC_ARCH='arm'
             ;;
         aarch64)
             BITS=64
             ARM=1
             BIGARM=$(grep -E "(BCM2709|Freescale i\\.MX6)" /proc/cpuinfo | wc -l)
             ARCH='aarch64-linux-gnu'
+            QRC_ARCH='arm'
             ;;
         *)
             err "${messages["err_unknown_platform"]} $PLATFORM"
@@ -869,6 +874,7 @@ stakingnode_rewardaddress(){
 
 
 stakingnode_info(){
+    _check_qrc
 
     if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLETSTATUS != "Locked" ]; then
         pending " --> ${messages["stakingnode_init_walletcheck"]}"
@@ -892,6 +898,9 @@ stakingnode_info(){
                 ok $IDINFO_LABEL
                 pending " --> Staking Node Public Key : "
                 ok $IDINFO_PUBKEY
+                if [ -e $INSTALL_DIR/qrc ] ; then
+                    echo $IDINFO_PUBKEY | $INSTALL_DIR/qrc | cat
+                fi
                 echo
                 FOUNDSTAKINGNODEKEY=1
             fi
@@ -904,6 +913,28 @@ stakingnode_info(){
         die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
     fi
 
+}
+
+_check_qrc() {
+    if [ ! -e $INSTALL_DIR/qrc ] ; then
+        QRC_DOWNLOAD_URL="https://github.com/fumiyas/qrc/releases/download/v0.1.1/qrc_linux_$QRC_ARCH"
+        pending " --> ${messages["downloading"]} ${QRC_DOWNLOAD_URL}... "
+        tput sc
+        echo -e "$C_CYAN"
+        $wget_cmd -O - $QRC_DOWNLOAD_URL | pv -trep -s27M -w80 -N qrc > $INSTALL_DIR/qrc
+        echo -ne "$C_NORM"
+        clear_n_lines 2
+        tput rc
+        clear_n_lines 3
+        if [ ! -e $INSTALL_DIR/qrc ] ; then
+            echo -e "${C_RED}error ${messages["downloading"]} file"
+            echo -e "tried to get $QRC_DOWNLOAD_URL$C_NORM"
+            exit 1
+        else
+            chmod +x $INSTALL_DIR/qrc
+            ok ${messages["done"]}
+        fi
+    fi
 }
 
 stakingnode_stats(){
@@ -1046,12 +1077,12 @@ _get_particld_proc_status(){
     if [ -e $INSTALL_DIR/particld.pid ] ; then
         PARTYD_HASPID=`ps --no-header \`cat $INSTALL_DIR/particld.pid 2>/dev/null\` | wc -l`;
     else
-        PARTYD_HASPID=$(pidof particld)
+        PARTYD_HASPID=$(pidof $INSTALL_DIR/particld)
         if [ $? -gt 0 ]; then
             PARTYD_HASPID=0
         fi
     fi
-    PARTYD_PID=$(pidof particld)
+    PARTYD_PID=$(pidof $INSTALL_DIR/particld)
 }
 
 get_particld_status(){
