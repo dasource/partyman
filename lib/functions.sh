@@ -1077,12 +1077,12 @@ _get_particld_proc_status(){
     if [ -e $INSTALL_DIR/particld.pid ] ; then
         PARTYD_HASPID=`ps --no-header \`cat $INSTALL_DIR/particld.pid 2>/dev/null\` | wc -l`;
     else
-        PARTYD_HASPID=$(pidof $INSTALL_DIR/particld)
+        PARTYD_HASPID=$(pidof particld)
         if [ $? -gt 0 ]; then
             PARTYD_HASPID=0
         fi
     fi
-    PARTYD_PID=$(pidof $INSTALL_DIR/particld)
+    PARTYD_PID=$(pidof particld)
 }
 
 get_particld_status(){
