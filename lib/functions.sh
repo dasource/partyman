@@ -899,7 +899,7 @@ stakingnode_info(){
                 pending " --> Staking Node Public Key : "
                 ok $IDINFO_PUBKEY
                 if [ -e $INSTALL_DIR/qrc ] ; then
-                    echo $IDINFO_PUBKEY | $INSTALL_DIR/qrc | cat
+                    $INSTALL_DIR/qrc $IDINFO_PUBKEY
                 fi
                 echo
                 FOUNDSTAKINGNODEKEY=1
