@@ -338,7 +338,7 @@ restart_particld(){
     ok "${messages["done"]}"
 
     pending " --> ${messages["starting_particld"]}"
-    $INSTALL_DIR/particld -daemon 2>&1 >/dev/null
+    $INSTALL_DIR/particld -daemon -smsg=false 2>&1 >/dev/null
     PARTYD_RUNNING=1
     PARTYD_RESPONDING=0
     ok "${messages["done"]}"
@@ -682,7 +682,7 @@ update_particld(){
         # punch it ---------------------------------------------------------------
 
         pending " --> ${messages["launching"]} particld... "
-        $INSTALL_DIR/particld -daemon 2>&1> /dev/null
+        $INSTALL_DIR/particld -daemon -smsg=false 2>&1> /dev/null
         ok "${messages["done"]}"
 
         # probe it ---------------------------------------------------------------
