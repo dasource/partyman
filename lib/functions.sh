@@ -285,11 +285,12 @@ _get_versions() {
     CURRENT_VERSION=$( $PARTY_CLI --version | grep -m1 Particl | sed 's/\Particl Core RPC client version v//g' | sed 's/\.[^.]*$//' 2>/dev/null ) 2>/dev/null
 
     LVCOUNTER=0
+    RELEASES=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases )
     while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
-        RELEASES=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases | jq -r .[$LVCOUNTER] 2>/dev/null)
-        PR=$( echo $RELEASES | jq .prerelease)
+        RELEASE=$( echo $RELEASES | jq -r .[$LVCOUNTER] 2>/dev/null )
+        PR=$( echo $RELEASE | jq .prerelease)
         if [ "$PR" == "false" ]; then
-            LATEST_VERSION=$( echo $RELEASES | jq -r .tag_name | sed 's/v//g')
+            LATEST_VERSION=$( echo $RELEASE | jq -r .tag_name | sed 's/v//g')
         else
             let LVCOUNTER=LVCOUNTER+1
         fi
