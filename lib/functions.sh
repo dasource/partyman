@@ -251,27 +251,27 @@ _get_platform_info() {
             BITS=32
             ARM=0
             ARCH='i686-pc-linux-gnu'
-            QRC_ARCH='386'
+            QRCODE_ARCH='386'
             ;;
         x86_64)
             BITS=64
             ARM=0
             ARCH='x86_64-linux-gnu'
-            QRC_ARCH='amd64'
+            QRCODE_ARCH='amd64'
             ;;
         armv7l)
             BITS=32
             ARM=1
             BIGARM=$(grep -E "(BCM2709|Freescale i\\.MX6)" /proc/cpuinfo | wc -l)
             ARCH='arm-linux-gnueabihf'
-            QRC_ARCH='arm'
+            QRCODE_ARCH='arm'
             ;;
         aarch64)
             BITS=64
             ARM=1
             BIGARM=$(grep -E "(BCM2709|Freescale i\\.MX6)" /proc/cpuinfo | wc -l)
             ARCH='aarch64-linux-gnu'
-            QRC_ARCH='arm'
+            QRCODE_ARCH='arm'
             ;;
         *)
             err "${messages["err_unknown_platform"]} $PLATFORM"
@@ -874,7 +874,7 @@ stakingnode_rewardaddress(){
 
 
 stakingnode_info(){
-    _check_qrc
+    _check_qrcode
 
     if [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_WALLETSTATUS != "Locked" ]; then
         pending " --> ${messages["stakingnode_init_walletcheck"]}"
@@ -898,8 +898,8 @@ stakingnode_info(){
                 ok $IDINFO_LABEL
                 pending " --> Staking Node Public Key : "
                 ok $IDINFO_PUBKEY
-                if [ -e $INSTALL_DIR/qrc ] ; then
-                    $INSTALL_DIR/qrc $IDINFO_PUBKEY
+                if [ -e $INSTALL_DIR/qrcode ] ; then
+                    $INSTALL_DIR/qrcode $IDINFO_PUBKEY
                 fi
                 echo
                 FOUNDSTAKINGNODEKEY=1
@@ -915,23 +915,23 @@ stakingnode_info(){
 
 }
 
-_check_qrc() {
-    if [ ! -e $INSTALL_DIR/qrc ] ; then
-        QRC_DOWNLOAD_URL="https://github.com/fumiyas/qrc/releases/download/v0.1.1/qrc_linux_$QRC_ARCH"
-        pending " --> ${messages["downloading"]} ${QRC_DOWNLOAD_URL}... "
+_check_qrcode() {
+    if [ ! -e $INSTALL_DIR/qrcode ] ; then
+        QRCODE_DOWNLOAD_URL="https://github.com/spazzymoto/qrcode/releases/download/v1.0.0/qrcode_linux_$QRCODE_ARCH"
+        pending " --> ${messages["downloading"]} ${QRCODE_DOWNLOAD_URL}... "
         tput sc
         echo -e "$C_CYAN"
-        $wget_cmd -O - $QRC_DOWNLOAD_URL | pv -trep -s27M -w80 -N qrc > $INSTALL_DIR/qrc
+        $wget_cmd -O - $QRCODE_DOWNLOAD_URL | pv -trep -s27M -w80 -N qrcode > $INSTALL_DIR/qrcode
         echo -ne "$C_NORM"
         clear_n_lines 2
         tput rc
         clear_n_lines 3
-        if [ ! -e $INSTALL_DIR/qrc ] ; then
+        if [ ! -e $INSTALL_DIR/qrcode ] ; then
             echo -e "${C_RED}error ${messages["downloading"]} file"
-            echo -e "tried to get $QRC_DOWNLOAD_URL$C_NORM"
+            echo -e "tried to get $QRCODE_DOWNLOAD_URL$C_NORM"
             exit 1
         else
-            chmod +x $INSTALL_DIR/qrc
+            chmod +x $INSTALL_DIR/qrcode
             ok ${messages["done"]}
         fi
     fi
