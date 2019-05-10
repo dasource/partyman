@@ -316,6 +316,9 @@ _check_particld_state() {
         PARTYD_RESPONDING=1
         PARTYD_WALLETSTATUS=$( $PARTY_CLI getwalletinfo | jq -r .encryptionstatus )
         PARTYD_WALLET=$( $PARTY_CLI getwalletinfo | jq -r .hdmasterkeyid )
+        if [ $PARTYD_WALLET  == "null" ]; then
+            PARTYD_WALLET=$( $PARTY_CLI getwalletinfo | jq -r .hdseedid )
+        fi        
         PARTYD_TBALANCE=$( $PARTY_CLI getwalletinfo | jq -r .total_balance )
     fi
 }
