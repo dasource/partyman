@@ -84,6 +84,7 @@ messages=(
     ["usage_stakingnode_new_description"]="[new] creates a new public key to use with your cold staking wallet"
     ["usage_stakingnode_stats_description"]="[stats] shows stakingnode earnings"
     ["usage_stakingnode_rewardaddress_description"]="[rewardaddress] configure particl address for staking rewards"
+    ["usage_stakingnode_info_description"]="[info] shows all public keys created for cold staking"
 
     ["usage_firewall_description"]="installs and configures the UFW firewall and allows ports 22,8080,51738 and 51938"
     ["usage_firewall_reset"]="disables the UFW firewall and resets the rules to default"
