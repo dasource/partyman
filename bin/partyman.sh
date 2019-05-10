@@ -162,18 +162,18 @@ case "$1" in
                     stakingnode_walletinit
                 elif [ "$APP" == 'new' ]; then
                     stakingnode_newpublickey
-            elif [ "$APP" == 'info' ]; then
+                elif [ "$APP" == 'info' ]; then
                     stakingnode_info
                 elif [ "$APP" == 'stats' ]; then
                     stakingnode_stats
                 elif [ "$APP" == 'rewardaddress' ]; then
                     stakingnode_rewardaddress
-            else
+                else
                     echo "don't know how to stakingnode: $2"
                 fi
-        else
-            stakingnode_info
-        fi
+            else
+                stakingnode_info
+            fi
             ;;
         firewall)
             COMMAND=$1
