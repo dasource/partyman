@@ -865,8 +865,16 @@ stakingnode_rewardaddress(){
 
         echo
         pending " --> ${messages["stakingnode_reward_address"]}"
+
+        if [ -z "$rewardAddress" ]
+        then
+            REWARDSETTING="{}"
+        else
+            REWARDSETTING="{\"rewardaddress\":\"$rewardAddress\"}"
+        fi
+
         echo
-        if $PARTY_CLI walletsettings stakingoptions "{\"rewardaddress\":\"$rewardAddress\"}"; then
+        if $PARTY_CLI walletsettings stakingoptions $REWARDSETTING; then
             ok ""
         else
             die "\n - error setting the reward address! ' ${messages["exiting"]}"
