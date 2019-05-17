@@ -9,8 +9,9 @@
 # check we're running bash 4 -------------------------------------------------
 #set -x
 
-if [[ ${BASH_VERSION%%.*} != '4' ]];then
-    die "partyman requires bash version 4. please update. exiting."
+if [ -z "$BASH_VERSION" ] || (( ${BASH_VERSION%%.*} < 4 )); then
+    echo "partyman requires bash version 4. please update. exiting." 1>&2
+    exit 1
 fi
 
 # parse any command line switches --------------------------------------------
