@@ -151,4 +151,6 @@ messages=(
     ["firewall_configure"]="configuring firewall ..."
     ["firewall_report"]="generating firewall status report ..."
 
+    ["no_python_fallback"]="Python not found, attempting fallback method to determine package manager."
+
 )

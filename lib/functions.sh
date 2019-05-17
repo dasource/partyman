@@ -111,25 +111,35 @@ EOF
 
 _check_dependencies() {
 
-    (which python 2>&1) >/dev/null || die "${messages["err_missing_dependency"]} python - sudo apt-get install python"
-
-    DISTRO=$(/usr/bin/env python -mplatform | sed -e 's/.*with-//g')
     INSTALL=install
-    if [[ $DISTRO == *"Ubuntu"* ]] || [[ $DISTRO == *"debian"* ]]; then
-        PKG_MANAGER=apt-get
-    elif [[ $DISTRO == *"centos"* ]]; then
-        PKG_MANAGER=yum
-    elif [[ $DISTRO == *"arch"* ]]; then
-        PKG_MANAGER=pacman
-        INSTALL=-S
+    PYTHON=$((which python 2>/dev/null) || (which python3 2>/dev/null))
+
+    if [ ! -z "$PYTHON" ]; then
+        DISTRO=$(/usr/bin/env $PYTHON -mplatform | sed -e 's/.*with-//g')
+        if [[ $DISTRO == *"Ubuntu"* ]] || [[ $DISTRO == *"debian"* ]]; then
+            PKG_MANAGER=apt-get
+        elif [[ $DISTRO == *"centos"* ]]; then
+            PKG_MANAGER=yum
+        elif [[ $DISTRO == *"arch"* ]]; then
+            PKG_MANAGER=pacman
+        elif [[ $DISTRO == *"gentoo"* ]]; then
+            PKG_MANAGER=emerge
+            INSTALL=
+        fi
+    else
+        echo -e "${C_RED}warning ${messages["no_python_fallback"]}$C_NORM"
+        PKG_MANAGER=$((which apt-get 2>/dev/null) \
+                      || (which yum 2>/dev/null) \
+                      || (which pacman 2>/dev/null) \
+                      || (which emerge 2>/dev/null))
     fi
 
-    if [ -z "$PKG_MANAGER" ]; then
-        (which apt-get 2>&1) >/dev/null || \
-            (which yum 2>&1) >/dev/null || \
-            (which pacman 2>&1) >/dev/null || \
-            die "${messages["err_no_pkg_mgr"]}"
+    if [[ $PKG_MANAGER == *"pacman" ]]; then
+        INSTALL=-S
+    elif [[ $PKG_MANAGER == *"emerge" ]]; then
+        INSTALL=
     fi
+
 
     (which curl 2>&1) >/dev/null || MISSING_DEPENDENCIES="${MISSING_DEPENDENCIES}curl "
     (which perl 2>&1) >/dev/null || MISSING_DEPENDENCIES="${MISSING_DEPENDENCIES}perl "
@@ -162,6 +172,9 @@ _check_dependencies() {
 
     if [ ! -z "$MISSING_DEPENDENCIES" ]; then
         err "${messages["err_missing_dependency"]} $MISSING_DEPENDENCIES\n"
+        if [ -z "$PKG_MANAGER" ]; then
+            die "${messages["err_no_pkg_mgr"]}"
+        fi
         sudo $PKG_MANAGER $INSTALL $MISSING_DEPENDENCIES
     fi
 }
@@ -323,7 +336,7 @@ _check_particld_state() {
         PARTYD_WALLET=$( $PARTY_CLI getwalletinfo | jq -r .hdmasterkeyid )
         if [ $PARTYD_WALLET  == "null" ]; then
             PARTYD_WALLET=$( $PARTY_CLI getwalletinfo | jq -r .hdseedid )
-        fi        
+        fi
         PARTYD_TBALANCE=$( $PARTY_CLI getwalletinfo | jq -r .total_balance )
     fi
 }
@@ -1003,7 +1016,7 @@ stakingnode_stats(){
             fi
             COUNTER=$((COUNTER-1))
         done
-        
+
         echo
         COUNTER=12
         YEAR=2018
@@ -1016,7 +1029,7 @@ stakingnode_stats(){
             fi
             COUNTER=$((COUNTER-1))
         done
-        
+
         echo
         COUNTER=12
         YEAR=2017
