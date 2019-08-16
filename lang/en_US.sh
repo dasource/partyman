@@ -41,6 +41,7 @@ messages=(
     ["err_downloading_file"]="error downloading file"
     ["err_tried_to_get"]="tried to get"
     ["err_no_pkg_mgr"]="cannot determine platform/package manager"
+    ["err_no_pkg_mgr_install_failed"]="installing dependency from package manager failed"
     ["err_missing_dependency"]="missing dependency:"
     ["err_unknown_platform"]="unknown platform:"
     ["err_partyman_supports"]="partyman currently supports 32/64bit linux and 32/64bit arm/aarch"

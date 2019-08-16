@@ -16,13 +16,11 @@ fi
 
 # parse any command line switches --------------------------------------------
 
-# --quiet, --verbose don't do anything yet
 i=0
-until [ "$((i=$i+1))" -gt "$#" ]
+until [ "$((i=i+1))" -gt "$#" ]
 do case "$1" in
     --help)    set -- "$@" "-h" ;;
     --quiet)   set -- "$@" "-q" ;;
-    --verbose) set -- "$@" "-v" ;;
     --version) set -- "$@" "-V" ;;
     *)         set -- "$@" "$1" ;;
 esac; shift; done
@@ -30,40 +28,41 @@ OPTIND=1
 while getopts "hqvV" o ; do # set $o to the next passed option
   case "$o" in
     q) QUIET=1 ;;
-    v) VERBOSE=1 ;;
     V) VERSION=1 ;;
     h) HELP=1 ;;
+    *) echo "Unknown option $o" 1>&2 ;;
   esac
 done
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 
 # load common functions ------------------------------------------------------
 
-PARTYMAN_BIN=$(readlink -f $0)
-PARTYMAN_GITDIR=$(readlink -f ${PARTYMAN_BIN%%/bin/${PARTYMAN_BIN##*/}})
-source $PARTYMAN_GITDIR/lib/functions.sh
+PARTYMAN_BIN=$(readlink -f "$0")
+PARTYMAN_GITDIR=$(readlink -f "${PARTYMAN_BIN%%/bin/${PARTYMAN_BIN##*/}}")
+# shellcheck source=lib/functions.sh
+source "$PARTYMAN_GITDIR/lib/functions.sh"
 
 # load language packs --------------------------------------------------------
 
 declare -A messages
 
 # set all default strings
-source $PARTYMAN_GITDIR/lang/en_US.sh
+source "$PARTYMAN_GITDIR/lang/en_US.sh"
 
 # override if configured
 lang_type=${LANG%%\.*}
-[[ -e $PARTYMAN_GITDIR/lang/$lang_type.sh ]] && source $PARTYMAN_GITDIR/lang/$lang_type.sh
+[[ -e $PARTYMAN_GITDIR/lang/$lang_type.sh ]] && source "$PARTYMAN_GITDIR/lang/$lang_type.sh"
 
 # process switch overrides ---------------------------------------------------
 
 # show version and exit if requested
-[[ $VERSION || $1 == 'version' ]] && echo $PARTYMAN_VERSION && exit 0
+[[ $VERSION || $1 == 'version' ]] && echo "$PARTYMAN_VERSION" && exit 0
 
 # show help and exit if requested or no command supplied - TODO make command specific
 [[ $HELP || -z $1 ]] && usage && exit 0
 
 # see if users are missing anything critical
-_check_dependencies $@
+_check_dependencies "$@"
 
 # have command, will travel... -----------------------------------------------
 
@@ -78,7 +77,7 @@ case "$1" in
             _check_partyman_updates
             _get_versions
             ok " ${messages["done"]}"
-            if [ ! -z "$2" ]; then
+            if [ -n "$2" ]; then
                 APP=$2;
                 if [ "$APP" == 'unattended' ]; then
                     UNATTENDED=1
@@ -111,7 +110,7 @@ case "$1" in
             _get_versions
             _check_particld_state
             ok " ${messages["done"]}"
-            if [ ! -z "$2" ]; then
+            if [ -n "$2" ]; then
                 if [ "$2" == '-y' ] || [ "$2" == '-Y' ]; then
                     UNATTENDED=1
                 fi
@@ -157,7 +156,7 @@ case "$1" in
             _get_versions
             _check_particld_state
             ok " ${messages["done"]}"
-            if [ ! -z "$2" ]; then
+            if [ -n "$2" ]; then
                 APP=$2;
                 if [ "$APP" == 'init' ]; then
                     stakingnode_walletinit
@@ -181,7 +180,7 @@ case "$1" in
             pending "${messages["gathering_info"]}"
             ok " ${messages["done"]}"
             echo
-            if [ ! -z "$2" ]; then
+            if [ -n "$2" ]; then
                 APP=$2;
                 if [ "$APP" == 'reset' ]; then
                     firewall_reset
