@@ -880,14 +880,21 @@ stakingnode_rewardaddress(){
         pending "Particl Address to send all rewards to : "
         read -r rewardAddress
 
+        PREV_OPTS="$PARTY_CLI" walletsettings stakingoptions
+        REWARDSETTING=$(echo $PREV_OPTS | jq '.stakingoptions')
+        if [ "$REWARDSETTING" == "\"default\"" ]; then
+            REWARDSETTING="{}"
+        fi
+        REWARDSETTING=$(echo $REWARDSETTING | jq 'del(.time)')
+
         echo
         pending " --> ${messages["stakingnode_reward_address"]}"
 
-        if [ -z "$rewardAddress" ]
+        if [ -n "$rewardAddress" ]
         then
-            REWARDSETTING="{}"
+            REWARDSETTING=$(echo $REWARDSETTING | jq 'del(.rewardaddress)')
         else
-            REWARDSETTING="{\"rewardaddress\":\"$rewardAddress\"}"
+            REWARDSETTING=$(echo $REWARDSETTING | jq '.rewardaddress = "$rewardAddress"')
         fi
 
         echo
@@ -902,7 +909,6 @@ stakingnode_rewardaddress(){
 
 
 }
-
 
 stakingnode_info(){
     _check_qrcode
