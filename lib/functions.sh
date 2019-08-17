@@ -401,7 +401,7 @@ install_particld(){
     if [ -z "$UNATTENDED" ] ; then
         if [ "$USER" != "particl" ]; then
             echo
-            warn "We stronly advise you run this installer under user \"particl\" with sudo access. Are you sure you wish to continue as $USER?"
+            warn "We strongly advise you run this installer under user \"particl\" with sudo access. Are you sure you wish to continue as $USER?"
             if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
                 echo -e "${C_RED}${messages["exiting"]}$C_NORM"
                 echo ""
