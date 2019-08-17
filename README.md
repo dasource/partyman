@@ -1,6 +1,6 @@
 # partyman
 
-Particl wallet/daemon management utilities - version 0.7
+Particl wallet/daemon management utilities - version 0.11
 
 * This script installs, updates, and manages single-user particl daemons and wallets
 * This script provides the ability to create a new wallet and manage staking node (cold staking functionality)
@@ -59,6 +59,10 @@ To get staking stats for this staking node, do:
 To configure the reward address for this staking node, do:
 
     partyman/partyman stakingnode rewardaddress
+
+To configure the smsg fee rate target for this staking node, do:
+
+    partyman/partyman stakingnode smsgfeeratetarget
 
 
 
