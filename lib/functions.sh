@@ -85,7 +85,7 @@ usage(){
 
             ${messages["usage_restart_description_now"]}
 
-        stakingnode [init, new, info, stats, rewardaddress]
+        stakingnode [init, new, info, stats, rewardaddress, smsgfeeratetarget]
 
             ${messages["usage_stakingnode_description"]}
             ${messages["usage_stakingnode_init_description"]}
@@ -93,6 +93,7 @@ usage(){
             ${messages["usage_stakingnode_info_description"]}
             ${messages["usage_stakingnode_stats_description"]}
             ${messages["usage_stakingnode_rewardaddress_description"]}
+            ${messages["usage_stakingnode_smsgfeeratetarget_description"]}
 
         status
 
@@ -177,6 +178,7 @@ _check_dependencies() {
         if [ -z "$PKG_MANAGER" ]; then
             die "${messages["err_no_pkg_mgr"]}"
         fi
+        # shellcheck disable=SC2086
         if ! sudo "$PKG_MANAGER" "$INSTALL" $MISSING_DEPENDENCIES; then
             die "${messages["err_no_pkg_mgr_install_failed"]}"
         fi
@@ -854,10 +856,13 @@ stakingnode_rewardaddress(){
         echo
 
         pending " --> ${messages["stakingnode_reward_check"]}"
-        CHECK_REWARD_ADDRESS=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions)
-        if [ ! "$CHECK_REWARD_ADDRESS" == "default" ] ; then
-            REWARD_ADDRESS=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions.rewardaddress)
-            REWARD_ADDRESS_DATE=$($PARTY_CLI walletsettings stakingoptions | jq -r .stakingoptions.time)
+        STAKE_OPTS=$($PARTY_CLI walletsettings stakingoptions | jq .stakingoptions)
+        if [ "$STAKE_OPTS" == "\"default\"" ]; then
+            STAKE_OPTS="{}"
+        fi
+        REWARD_ADDRESS=$(echo "$STAKE_OPTS" | jq -r .rewardaddress)
+        if [ -n "$REWARD_ADDRESS" ] && [ "$REWARD_ADDRESS" != "null" ] ; then
+            REWARD_ADDRESS_DATE=$(echo "$STAKE_OPTS" | jq -r .time)
             REWARD_ADDRESS_DATEFORMATTED=$(stamp2date "$REWARD_ADDRESS_DATE")
             ok "${messages["done"]}"
             pending " --> ${messages["stakingnode_reward_found"]}"
@@ -880,28 +885,90 @@ stakingnode_rewardaddress(){
         pending "Particl Address to send all rewards to : "
         read -r rewardAddress
 
-        PREV_OPTS="$PARTY_CLI" walletsettings stakingoptions
-        REWARDSETTING=$(echo $PREV_OPTS | jq '.stakingoptions')
-        if [ "$REWARDSETTING" == "\"default\"" ]; then
-            REWARDSETTING="{}"
-        fi
-        REWARDSETTING=$(echo $REWARDSETTING | jq 'del(.time)')
-
         echo
         pending " --> ${messages["stakingnode_reward_address"]}"
 
-        if [ -n "$rewardAddress" ]
+        STAKE_OPTS=$(echo "$STAKE_OPTS" | jq 'del(.time)')
+        if [ -z "$rewardAddress" ]
         then
-            REWARDSETTING=$(echo $REWARDSETTING | jq 'del(.rewardaddress)')
+            STAKE_OPTS=$(echo "$STAKE_OPTS" | jq 'del(.rewardaddress)')
         else
-            REWARDSETTING=$(echo $REWARDSETTING | jq '.rewardaddress = "$rewardAddress"')
+            STAKE_OPTS=$(echo "$STAKE_OPTS" | jq ".rewardaddress = \"${rewardAddress}\"")
         fi
 
         echo
-        if "$PARTY_CLI" walletsettings stakingoptions "$REWARDSETTING"; then
+        if "$PARTY_CLI" walletsettings stakingoptions "$STAKE_OPTS"; then
             ok ""
         else
             die "\n - error setting the reward address! ' ${messages["exiting"]}"
+        fi
+    else
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
+    fi
+
+
+}
+
+stakingnode_smsgfeeratetarget(){
+
+    if [ $PARTYD_RUNNING == 1 ] && [ "$PARTYD_WALLETSTATUS" != "Locked" ]; then
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
+        if [ ! "$PARTYD_WALLET"  == "null" ]; then
+            ok "${messages["done"]}"
+        else
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
+        fi
+        if [ "$PARTYD_TBALANCE" -gt 0 ]; then
+            die "\n -  WOAH holdup! you cannot setup coldstaking on a hotstaking wallet! ${messages["exiting"]}"
+        fi
+        echo
+
+        pending " --> ${messages["stakingnode_smsgfeerate_check"]}"
+        STAKE_OPTS=$($PARTY_CLI walletsettings stakingoptions | jq .stakingoptions)
+        if [ "$STAKE_OPTS" == "\"default\"" ]; then
+            STAKE_OPTS="{}"
+        fi
+        SMSG_FEE_RATE_TARGET=$(echo "$STAKE_OPTS" | jq -r .smsgfeeratetarget)
+        if [ -n "$SMSG_FEE_RATE_TARGET" ] && [ "$SMSG_FEE_RATE_TARGET" != "null" ] ; then
+            SMSG_FEE_RATE_TARGET_DATE=$(echo "$STAKE_OPTS" | jq -r .time)
+            SMSG_FEE_RATE_TARGET_DATEFORMATTED=$(stamp2date "$SMSG_FEE_RATE_TARGET_DATE")
+            ok "${messages["done"]}"
+            pending " --> ${messages["stakingnode_smsgfeerate_found"]}"
+            highlight "$SMSG_FEE_RATE_TARGET (Set on $SMSG_FEE_RATE_TARGET_DATEFORMATTED)"
+        else
+            ok "${messages["done"]}"
+            pending " --> ${messages["stakingnode_smsgfeerate_found"]}"
+            highlight "default mode"
+            echo -e "** Your wallet is configured in default mode - it will not attempt to adjust the smsg fee rate."
+        fi
+
+        echo
+        pending "Configure a new smsg fee rate target?"
+        if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
+            echo -e "${C_RED}${messages["exiting"]}$C_NORM"
+            echo ""
+            exit 0
+        fi
+
+        pending "Amount to adjust the smsg fee rate towards : "
+        read -r feeRateTarget
+
+        echo
+        pending " --> ${messages["stakingnode_smsgfeerate_address"]}"
+
+        STAKE_OPTS=$(echo "$STAKE_OPTS" | jq 'del(.time)')
+        if [ -z "$feeRateTarget" ]
+        then
+            STAKE_OPTS=$(echo "$STAKE_OPTS" | jq 'del(.smsgfeeratetarget)')
+        else
+            STAKE_OPTS=$(echo "$STAKE_OPTS" | jq ".smsgfeeratetarget = \"${feeRateTarget}\"")
+        fi
+
+        echo
+        if "$PARTY_CLI" walletsettings stakingoptions "$STAKE_OPTS"; then
+            ok ""
+        else
+            die "\n - error setting the smsg fee rate target! ' ${messages["exiting"]}"
         fi
     else
         die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
@@ -1276,27 +1343,27 @@ print_status() {
 
     pending "${messages["status_hostnam"]}" ; ok "$HOSTNAME"
     pending "${messages["status_uptimeh"]}" ; ok "$HOST_UPTIME_DAYS ${messages["days"]}, $HOST_LOAD_AVERAGE"
-    pending "${messages["status_particldip"]}" ; [ "$PUBLIC_IPV4" != "none" ] && ok "$PUBLIC_IPV4" || err "$PUBLIC_IPV4"
+    pending "${messages["status_particldip"]}" ; if [ "$PUBLIC_IPV4" != "none" ] ; then ok "$PUBLIC_IPV4" ; else err "$PUBLIC_IPV4" ; fi
     pending "${messages["status_particldve"]}" ; ok "$CURRENT_VERSION"
-    pending "${messages["status_uptodat"]}" ; [ "$PARTYD_UP_TO_DATE"      -gt 0 ] && ok "${messages["YES"]}" || err "$PARTYD_UP_TO_DATE_STATUS ($LATEST_VERSION)"
-    pending "${messages["status_running"]}" ; [ "$PARTYD_HASPID"          -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_uptimed"]}" ; [ "$PARTYD_UPTIME"          -gt 0 ] && ok "$(displaytime $PARTYD_UPTIME)" || err "${messages["NO"]}"
-    pending "${messages["status_drespon"]}" ; [ "$PARTYD_RUNNING"         -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_dlisten"]}" ; [ "$PARTYD_LISTENING"       -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_dportop"]}" ; [ "$PUBLIC_PORT_CLOSED"     -lt 1 ] && ok "${messages["YES"]}" || highlight "${messages["NO"]}*"
-    pending "${messages["status_dconnec"]}" ; [ "$PARTYD_CONNECTED"       -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_dconcnt"]}" ; [ "$PARTYD_CONNECTIONS"     -gt 0 ] && ok "$PARTYD_CONNECTIONS" || err "$PARTYD_CONNECTIONS"
-    pending "${messages["status_dblsync"]}" ; [ "$PARTYD_SYNCED"          -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]}"
-    pending "${messages["status_dbllast"]}" ; [ "$PARTYD_SYNCED"          -gt 0 ] && ok "$PARTYD_CURRENT_BLOCK" || err "$PARTYD_CURRENT_BLOCK"
-    pending "${messages["status_webpart"]}" ; [ "$WEB_BLOCK_COUNT_PART"   -gt 0 ] && ok "$WEB_BLOCK_COUNT_PART" || err "$WEB_BLOCK_COUNT_PART"
-    pending "${messages["status_webchai"]}" ; [ "$WEB_BLOCK_COUNT_CHAINZ" -gt 0 ] && ok "$WEB_BLOCK_COUNT_CHAINZ" || err "$WEB_BLOCK_COUNT_CHAINZ"
+    pending "${messages["status_uptodat"]}" ; if [ "$PARTYD_UP_TO_DATE"      -gt 0 ] ; then ok "${messages["YES"]}" ; else err "$PARTYD_UP_TO_DATE_STATUS ($LATEST_VERSION)" ; fi
+    pending "${messages["status_running"]}" ; if [ "$PARTYD_HASPID"          -gt 0 ] ; then ok "${messages["YES"]}" ; else err "${messages["NO"]}" ; fi
+    pending "${messages["status_uptimed"]}" ; if [ "$PARTYD_UPTIME"          -gt 0 ] ; then ok "$(displaytime $PARTYD_UPTIME)" ; else err "${messages["NO"]}" ; fi
+    pending "${messages["status_drespon"]}" ; if [ "$PARTYD_RUNNING"         -gt 0 ] ; then ok "${messages["YES"]}" ; else err "${messages["NO"]}" ; fi
+    pending "${messages["status_dlisten"]}" ; if [ "$PARTYD_LISTENING"       -gt 0 ] ; then ok "${messages["YES"]}" ; else err "${messages["NO"]}" ; fi
+    pending "${messages["status_dportop"]}" ; if [ "$PUBLIC_PORT_CLOSED"     -lt 1 ] ; then ok "${messages["YES"]}" ; else highlight "${messages["NO"]}*" ; fi
+    pending "${messages["status_dconnec"]}" ; if [ "$PARTYD_CONNECTED"       -gt 0 ] ; then ok "${messages["YES"]}" ; else err "${messages["NO"]}" ; fi
+    pending "${messages["status_dconcnt"]}" ; if [ "$PARTYD_CONNECTIONS"     -gt 0 ] ; then ok "$PARTYD_CONNECTIONS" ; else err "$PARTYD_CONNECTIONS" ; fi
+    pending "${messages["status_dblsync"]}" ; if [ "$PARTYD_SYNCED"          -gt 0 ] ; then ok "${messages["YES"]}" ; else err "${messages["NO"]}" ; fi
+    pending "${messages["status_dbllast"]}" ; if [ "$PARTYD_SYNCED"          -gt 0 ] ; then ok "$PARTYD_CURRENT_BLOCK" ; else err "$PARTYD_CURRENT_BLOCK" ; fi
+    pending "${messages["status_webpart"]}" ; if [ "$WEB_BLOCK_COUNT_PART"   -gt 0 ] ; then ok "$WEB_BLOCK_COUNT_PART" ; else err "$WEB_BLOCK_COUNT_PART" ; fi
+    pending "${messages["status_webchai"]}" ; if [ "$WEB_BLOCK_COUNT_CHAINZ" -gt 0 ] ; then ok "$WEB_BLOCK_COUNT_CHAINZ" || err "$WEB_BLOCK_COUNT_CHAINZ" ; fi
     if [ $PARTYD_RUNNING == 1 ]; then
         pending "${messages["breakline"]}" ; ok ""
-        pending "${messages["status_stakeen"]}" ; [ $STAKING_ENABLED -gt 0 ] && ok "${messages["YES"]} - $STAKING_PERCENTAGE%" || err "${messages["NO"]}"
+        pending "${messages["status_stakeen"]}" ; if [ $STAKING_ENABLED -gt 0 ] ; then ok "${messages["YES"]} - $STAKING_PERCENTAGE%" ; else err "${messages["NO"]}" ; fi
         pending "${messages["status_stakedi"]}" ; ok "$(printf "%'.0f" "$STAKING_DIFF")"
         pending "${messages["status_stakenw"]}" ; ok "$(printf "%'.0f" "$PARTYD_NETSTAKEWEIGHT")"
         pending "${messages["breakline"]}" ; ok ""
-        pending "${messages["status_stakecu"]}" ; [ $STAKING_CURRENT -gt 0 ] && ok "${messages["YES"]}" || err "${messages["NO"]} - $STAKING_STATUS"
+        pending "${messages["status_stakecu"]}" ; if [ $STAKING_CURRENT -gt 0 ] ; then ok "${messages["YES"]}" ; else err "${messages["NO"]} - $STAKING_STATUS" ; fi
         pending "${messages["status_stakeww"]}" ; ok "$PARTYD_STAKEWEIGHTLINE"
         pending "${messages["status_stakebl"]}" ; ok "$(printf "%'.0f" "$CSTAKING_BALANCE")"
     fi

@@ -168,6 +168,8 @@ case "$1" in
                     stakingnode_stats
                 elif [ "$APP" == 'rewardaddress' ]; then
                     stakingnode_rewardaddress
+                elif [ "$APP" == 'smsgfeeratetarget' ]; then
+                    stakingnode_smsgfeeratetarget
                 else
                     echo "don't know how to stakingnode: $2"
                 fi

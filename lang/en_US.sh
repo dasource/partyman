@@ -85,6 +85,7 @@ messages=(
     ["usage_stakingnode_new_description"]="[new] creates a new public key to use with your cold staking wallet"
     ["usage_stakingnode_stats_description"]="[stats] shows stakingnode earnings"
     ["usage_stakingnode_rewardaddress_description"]="[rewardaddress] configure particl address for staking rewards"
+    ["usage_stakingnode_smsgfeeratetarget_description"]="[smsgfeeratetarget] configure smsg fee rate target"
     ["usage_stakingnode_info_description"]="[info] shows all public keys created for cold staking"
 
     ["usage_firewall_description"]="installs and configures the UFW firewall and allows ports 22,8080,51738 and 51938"
@@ -143,6 +144,9 @@ messages=(
     ["stakingnode_reward_check"]="checking for existing reward address config ... "
     ["stakingnode_reward_address"]="configuring reward address ... "
     ["stakingnode_reward_found"]="Current Reward Address : "
+    ["stakingnode_smsgfeerate_check"]="checking for existing smsg fee rate target config ... "
+    ["stakingnode_smsgfeerate_address"]="configuring smsg fee rate target ... "
+    ["stakingnode_smsgfeerate_found"]="Current smsg fee rate target : "
 
     ["stakingnode_stats_daily"]="getting stats for current month ... "
     ["stakingnode_stats_monthly"]="getting stats for entire year ... "
