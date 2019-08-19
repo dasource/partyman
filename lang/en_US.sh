@@ -41,6 +41,7 @@ messages=(
     ["err_downloading_file"]="error downloading file"
     ["err_tried_to_get"]="tried to get"
     ["err_no_pkg_mgr"]="cannot determine platform/package manager"
+    ["err_no_pkg_mgr_install_failed"]="installing dependency from package manager failed"
     ["err_missing_dependency"]="missing dependency:"
     ["err_unknown_platform"]="unknown platform:"
     ["err_partyman_supports"]="partyman currently supports 32/64bit linux and 32/64bit arm/aarch"
@@ -84,6 +85,7 @@ messages=(
     ["usage_stakingnode_new_description"]="[new] creates a new public key to use with your cold staking wallet"
     ["usage_stakingnode_stats_description"]="[stats] shows stakingnode earnings"
     ["usage_stakingnode_rewardaddress_description"]="[rewardaddress] configure particl address for staking rewards"
+    ["usage_stakingnode_smsgfeeratetarget_description"]="[smsgfeeratetarget] configure smsg fee rate target"
     ["usage_stakingnode_info_description"]="[info] shows all public keys created for cold staking"
 
     ["usage_firewall_description"]="installs and configures the UFW firewall and allows ports 22,8080,51738 and 51938"
@@ -142,6 +144,9 @@ messages=(
     ["stakingnode_reward_check"]="checking for existing reward address config ... "
     ["stakingnode_reward_address"]="configuring reward address ... "
     ["stakingnode_reward_found"]="Current Reward Address : "
+    ["stakingnode_smsgfeerate_check"]="checking for existing smsg fee rate target config ... "
+    ["stakingnode_smsgfeerate_address"]="configuring smsg fee rate target ... "
+    ["stakingnode_smsgfeerate_found"]="Current smsg fee rate target : "
 
     ["stakingnode_stats_daily"]="getting stats for current month ... "
     ["stakingnode_stats_monthly"]="getting stats for entire year ... "
@@ -150,5 +155,7 @@ messages=(
     ["firewall_status"]="checking status of firewall ..."
     ["firewall_configure"]="configuring firewall ..."
     ["firewall_report"]="generating firewall status report ..."
+
+    ["no_python_fallback"]="Python not found, attempting fallback method to determine package manager."
 
 )
