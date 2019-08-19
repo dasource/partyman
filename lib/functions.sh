@@ -28,8 +28,8 @@ DOWNLOAD_PAGE="https://github.com/particl/particl-core/releases"
 #    PARTYMAN_CHECKOUT=" ("$PARTYMAN_CHECKOUT")"
 #fi
 
-curl_cmd="timeout 7 curl -s -L -A partyman/$PARTYMAN_VERSION"
-wget_cmd='wget --no-check-certificate -q'
+curl_cmd="timeout 7 curl -4 -s -L -A partyman/$PARTYMAN_VERSION"
+wget_cmd='wget -4 --no-check-certificate -q'
 
 
 # (mostly) functioning functions -- lots of refactoring to do ----------------
@@ -1297,5 +1297,5 @@ show_message_configure() {
 }
 
 get_public_ips() {
-    PUBLIC_IPV4=$(dig +short myip.opendns.com @resolver1.opendns.com)
+    PUBLIC_IPV4=$(dig -4 +short myip.opendns.com @resolver1.opendns.com)
 }
