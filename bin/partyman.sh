@@ -114,7 +114,9 @@ case "$1" in
                 if [ "$2" == '-y' ] || [ "$2" == '-Y' ]; then
                     UNATTENDED=1
                 fi
-
+                if [ "$2" == '-prer' ]; then
+                    PRER=1
+                fi
             fi
             update_particld
             ;;
