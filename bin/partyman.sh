@@ -116,6 +116,7 @@ case "$1" in
                 fi
                 if [ "$2" == '-prer' ]; then
                     PRER=1
+                   _get_versions
                 fi
             fi
             update_particld
