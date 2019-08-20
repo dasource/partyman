@@ -308,12 +308,13 @@ _get_versions() {
     if [ -z "$PARTY_CLI" ]; then PARTY_CLI='echo'; fi
     CURRENT_VERSION=$( $PARTY_CLI --version | grep -m1 Particl | sed 's/\Particl Core RPC client version v//g' | sed 's/\.[^.]*$//' 2>/dev/null ) 2>/dev/null
 
+    unset LATEST_VERSION
     LVCOUNTER=0
     RELEASES=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases )
     while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
         RELEASE=$( echo "$RELEASES" | jq -r .[$LVCOUNTER] 2>/dev/null )
         PR=$( echo "$RELEASE" | jq .prerelease)
-        if [ "$PR" == "false" ]; then
+        if [ "$PR" == "false" ] || [ "$PRER" == 1 ]; then
             LATEST_VERSION=$( echo "$RELEASE" | jq -r .tag_name | sed 's/v//g')
         else
             (( LVCOUNTER=LVCOUNTER+1 ))
@@ -595,6 +596,9 @@ update_particld(){
 
             pending "${messages["reinstall_to"]} $INSTALL_DIR$C_NORM?"
         else
+            if [ -n "$PRER" ] ; then
+               _get_versions
+            fi
             echo -e ""
             echo -e "$C_RED*** ${messages["newer_particl_available"]} ***$C_NORM"
             echo -e ""
