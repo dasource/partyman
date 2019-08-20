@@ -596,9 +596,6 @@ update_particld(){
 
             pending "${messages["reinstall_to"]} $INSTALL_DIR$C_NORM?"
         else
-            if [ -n "$PRER" ] ; then
-               _get_versions
-            fi
             echo -e ""
             echo -e "$C_RED*** ${messages["newer_particl_available"]} ***$C_NORM"
             echo -e ""
