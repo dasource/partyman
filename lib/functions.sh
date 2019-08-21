@@ -952,7 +952,7 @@ stakingnode_smsgfeeratetarget(){
         fi
 
         echo ""
-        pending "** We recommend a smsg fee rate of : "
+        pending "** partyman recommends a smsg fee rate of : "
         highlight "0.00020000"
         echo ""
         pending "Amount to adjust the smsg fee rate towards : "
