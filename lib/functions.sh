@@ -951,6 +951,10 @@ stakingnode_smsgfeeratetarget(){
             exit 0
         fi
 
+        echo ""
+        pending "** We recommend a smsg fee rate of : "
+        highlight "0.00020000"
+        echo ""
         pending "Amount to adjust the smsg fee rate towards : "
         read -r feeRateTarget
 
