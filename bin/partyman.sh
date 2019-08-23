@@ -99,6 +99,12 @@ case "$1" in
             _get_versions
             _check_particld_state
             REINSTALL=1
+            if [ -n "$2" ]; then
+                if [ "$2" == '-prer' ]; then
+                    PRER=1
+                   _get_versions
+                fi
+            fi
             ok " ${messages["done"]}"
             update_particld
             ;;
