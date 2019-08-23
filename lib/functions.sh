@@ -591,6 +591,7 @@ update_particld(){
         if [ -n "$REINSTALL" ];then
             echo -e ""
             echo -e "$C_GREEN*** ${messages["particl_version"]} $CURRENT_VERSION is up-to-date. ***$C_NORM"
+            echo -e "${messages["latest_version"]} $C_GREEN$LATEST_VERSION$C_NORM"
             echo -e ""
             echo -en
 
