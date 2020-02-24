@@ -1144,6 +1144,174 @@ stakingnode_stats(){
 
 }
 
+stakingnode_proposallist(){
+
+    if [ $PARTYD_RUNNING == 1 ] && [ "$PARTYD_WALLETSTATUS" != "Locked" ]; then
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
+        if [ ! "$PARTYD_WALLET"  == "null" ]; then
+            ok "${messages["done"]}"
+        else
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
+        fi
+
+        PROPOSAL_DOWNLOAD_URL="https://raw.githubusercontent.com/particlcommunity/particl-proposals/testnet/metadata.txt"
+        echo
+
+        pending " --> ${messages["proposal_get_active"]}"
+        tput sc
+        echo -e "$C_CYAN"
+        $wget_cmd -O - $PROPOSAL_DOWNLOAD_URL | pv -trep -s27M -w80 -N proposal > "proposal"
+        echo -ne "$C_NORM"
+        clear_n_lines 2
+        tput rc
+        clear_n_lines 3
+        if [ ! -e "proposal" ] ; then
+            echo -e "${C_RED}error ${messages["downloading"]} file"
+            echo -e "tried to get $PROPOSAL_DOWNLOAD_URL$C_NORM"
+            exit 1
+        else
+        ok "${messages["done"]}"
+        fi
+
+        pending " --> ${messages["proposal_reading"]}"
+        PROPOSALLIST=$( cat proposal | jq -r .);
+
+        if [ -z "$PROPOSALLIST" ]; then
+           rm -rf proposal
+           die "\n - failed to get proposal list ${messages["exiting"]}"
+        fi
+        ok "${messages["done"]}"
+
+        pending " --> ${messages["proposal_process"]}"
+        ok "${messages["done"]}"
+
+        echo
+        #PROCESSPROPOSALLIST=$( echo $PROPOSALLIST | jq -r '. | "\(.proposalid)\t\(.name)\t\(.blockheight_start)\t\(.blockheight_end)\t\(.link)"');
+        #PROCESSPROPOSALLIST=$( echo $PROPOSALLIST | jq -r '(.[0] |keys_unsorted | @tsv), (.[]|.|map(.) |@tsv)' | column -t);
+        printf '%s\n' "$PROPOSALLIST"
+
+    else
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
+    fi
+
+}
+
+stakingnode_proposalvote(){
+
+    if [ $PARTYD_RUNNING == 1 ] && [ "$PARTYD_WALLETSTATUS" != "Locked" ]; then
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
+        if [ ! "$PARTYD_WALLET"  == "null" ]; then
+            ok "${messages["done"]}"
+        else
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
+        fi
+
+        if [ ! -e "proposal" ] ; then
+            die "\n - no proposal data exists, please type 'partyman proposal list' ${messages["exiting"]}"
+        fi
+
+        echo
+        highlight "Setting a new vote will clear all previous settings. You can only vote on one proposal at a time."
+        echo
+        pending "Continue to set a new vote?"
+        if ! confirm " [${C_GREEN}y${C_NORM}/${C_RED}N${C_NORM}] $C_CYAN"; then
+            echo -e "${C_RED}${messages["exiting"]}$C_NORM"
+            echo ""
+            exit 0
+        fi
+
+        echo
+        pending "Proposal ID : "
+        read -r proposalid
+
+        pending "checking if valid proposal ... "
+        PROPOSAL_HEIGHT_START=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
+        PROPOSAL_HEIGHT_END=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
+
+        if [ -z "$PROPOSAL_HEIGHT_START" ]; then
+            die "\n - not a valid proposal id! ' ${messages["exiting"]}"
+        fi
+
+        PARTYD_CURRENT_BLOCK=$("$PARTY_CLI" getblockcount 2>/dev/null)
+        if [ -z "$PARTYD_CURRENT_BLOCK" ] ; then PARTYD_CURRENT_BLOCK=0 ; fi
+
+        if [ "$PARTYD_CURRENT_BLOCK" -gt "$PROPOSAL_HEIGHT_END" ]; then
+            die "\n - proposal voting has finished! ' ${messages["exiting"]}"
+        fi
+
+        ok "${messages["done"]}"
+
+        PROPOSALDETAILS=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
+        printf '%s\n' "$PROPOSALDETAILS"
+
+        echo
+        pending "Abstain (0), Vote For (1) or Vote Against (2) [default=0]: "
+        read -r proposaloption
+
+        if [ -z "$proposaloption" ]; then
+            proposaloption=0
+        fi
+
+        if [ "$proposaloption" == 0 ]; then
+            proposalid=0
+        fi
+
+        if "$PARTY_CLI" setvote "$proposalid" "$proposaloption" "$PROPOSAL_HEIGHT_START" "$PROPOSAL_HEIGHT_END"; then
+            ok ""
+        else
+            die "\n - error setting vote! ' ${messages["exiting"]}"
+	fi
+
+    else
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
+    fi
+
+}
+
+stakingnode_proposaltally(){
+
+    if [ $PARTYD_RUNNING == 1 ] && [ "$PARTYD_WALLETSTATUS" != "Locked" ]; then
+        pending " --> ${messages["stakingnode_init_walletcheck"]}"
+        if [ ! "$PARTYD_WALLET"  == "null" ]; then
+            ok "${messages["done"]}"
+        else
+            die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
+        fi
+
+        if [ ! -e "proposal" ] ; then
+            die "\n - no proposal data exists, please type 'partyman proposal list' ${messages["exiting"]}"
+        fi
+
+        echo
+        pending "Proposal ID : "
+        read -r proposalid
+
+        pending "checking if valid proposal ... "
+        PROPOSAL_HEIGHT_START=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
+        PROPOSAL_HEIGHT_END=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
+
+        if [ -z "$PROPOSAL_HEIGHT_START" ]; then
+            die "\n - not a valid proposal id! ' ${messages["exiting"]}"
+        fi
+
+        ok "${messages["done"]}"
+        PROPOSALDETAILS=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
+        printf '%s\n' "$PROPOSALDETAILS"
+
+
+        pending "checking blockchain for voting data ... "
+        echo
+        if "$PARTY_CLI" tallyvotes "$proposalid" "$PROPOSAL_HEIGHT_START" "$PROPOSAL_HEIGHT_END"; then
+            ok ""
+        else
+            die "\n - error getting vote details! ' ${messages["exiting"]}"
+        fi
+
+    else
+        die "\n - wallet is locked! Please unlock first. ${messages["exiting"]}"
+    fi
+
+}
 configure_firewall(){
 
     UFW_STATUS=$(sudo ufw status | head -n 1 | cut -d' ' -f2)

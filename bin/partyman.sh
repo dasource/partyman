@@ -186,6 +186,29 @@ case "$1" in
                 stakingnode_info
             fi
             ;;
+        proposal)
+            COMMAND=$1
+            pending "${messages["gathering_info"]}"
+            _check_partyman_updates
+            _find_particl_directory
+            _get_versions
+            _check_particld_state
+            ok " ${messages["done"]}"
+            if [ -n "$2" ]; then
+                APP=$2;
+                if [ "$APP" == 'list' ]; then
+                    stakingnode_proposallist
+                elif [ "$APP" == 'vote' ]; then
+                    stakingnode_proposalvote
+                elif [ "$APP" == 'tally' ]; then
+                    stakingnode_proposaltally
+                else
+                    echo "don't know how to proposal: $2"
+                fi
+            else
+                stakingnode_proposallist
+            fi
+            ;;
         firewall)
             COMMAND=$1
             pending "${messages["gathering_info"]}"

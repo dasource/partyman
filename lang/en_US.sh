@@ -158,4 +158,7 @@ messages=(
 
     ["no_python_fallback"]="Python not found, attempting fallback method to determine package manager."
 
+    ["proposal_get_active"]="getting active proposals ... "
+    ["proposal_process"]="processing proposals ... "
+    ["proposal_reading"]="reading proposal data ... "
 )
