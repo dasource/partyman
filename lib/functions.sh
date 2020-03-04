@@ -1158,13 +1158,7 @@ stakingnode_proposallist(){
         echo
 
         pending " --> ${messages["proposal_get_active"]}"
-        tput sc
-        echo -e "$C_CYAN"
         $wget_cmd -O - $PROPOSAL_DOWNLOAD_URL | pv -trep -s27M -w80 -N proposal > "proposal"
-        echo -ne "$C_NORM"
-        clear_n_lines 2
-        tput rc
-        clear_n_lines 3
         if [ ! -e "proposal" ] ; then
             echo -e "${C_RED}error ${messages["downloading"]} file"
             echo -e "tried to get $PROPOSAL_DOWNLOAD_URL$C_NORM"
