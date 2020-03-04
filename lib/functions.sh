@@ -1154,7 +1154,7 @@ stakingnode_proposallist(){
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
-        PROPOSAL_DOWNLOAD_URL="https://raw.githubusercontent.com/particlcommunity/particl-proposals/testnet/metadata.txt"
+        PROPOSAL_DOWNLOAD_URL="https://raw.githubusercontent.com/particlcommunity/particl-proposals/master/testnet/metadata.txt"
         echo
 
         pending " --> ${messages["proposal_get_active"]}"
