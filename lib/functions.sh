@@ -1438,7 +1438,7 @@ get_particld_status(){
         STAKING_STATUS=$(echo "$PARTYD_GETSTAKINGINFO" | grep cause | awk '{print $2}' | sed -e 's/[",]//g')
         STAKING_PERCENTAGE=$(echo "$PARTYD_GETSTAKINGINFO" | grep percentyearreward | awk '{print $2}' | sed -e 's/[",]//g')
         STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g' | awk '{ printf( "%0.f\n", $1 ) }')
-        PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g')
+        PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g' | awk '{ printf( "%0.f\n", $1 ) }')
         PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g' | awk '{ printf( "%0.f\n", $1 ) }')
 
         PARTYD_NETSTAKEWEIGHT=$((PARTYD_NETSTAKEWEIGHT / 100000000))
