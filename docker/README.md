@@ -39,7 +39,9 @@ Run `docker-compose up -d`
 3. Configure Basic Auth middleware.
 4. Run `./deploy-partyman.sh` to deploy the partyman stack.
 5. Wait for the blocks to get downloaded.
-5. Done, the partyman status should now be available at [https://partyman.yourdomain.com](https://partyman.yourdomain.com).
+6. Create new wallet `./partyman.sh stakingnode init` and write down your recovery phrase.
+7. Create a Cold Staking Public Key `./partyman.sh stakingnode new`.
+8. Done, the partyman status should now be available at [https://partyman.yourdomain.com](https://partyman.yourdomain.com).
 
 ### Lets Encrypt + Cloudflare DNS
 
