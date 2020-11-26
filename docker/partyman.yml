@@ -43,8 +43,8 @@ services:
           - node.labels.${STACK_NAME}.partyman == true
       resources:
         limits:
-          cpus: '0.5'
-          memory: 1024M
+          cpus: '1'
+          memory: 1536M
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=${TRAEFIK_NETWORK}"
