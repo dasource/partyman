@@ -1,4 +1,4 @@
 SHELL=/bin/bash
 BASH_ENV=/container.env
-*/1 * * * * /bin/bash /root/partyman/bin/cron.sh >> /root/partyman/cron.log 2>&1
+*/10 * * * * /bin/bash /root/partyman/bin/cron.sh >> /root/partyman/cron.log 2>&1
 # extra line
