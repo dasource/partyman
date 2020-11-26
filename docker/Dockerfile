@@ -28,12 +28,11 @@ RUN echo ${CONTAINER_TIMEZONE} >/etc/timezone && \
 RUN ntpdate -q ntp.ubuntu.com
 
 WORKDIR /root
-# TODO: change
-RUN git clone https://github.com/xludx/partyman.git
+#RUN git clone https://github.com/xludx/partyman.git
+RUN git clone https://github.com/dasource/partyman.git
 
 WORKDIR /root/partyman
-# TODO: remove
-RUN git checkout dockerized
+#RUN git checkout dockerized
 COPY bin/entrypoint.sh bin/entrypoint.sh
 COPY bin/cron.sh bin/cron.sh
 COPY conf/crontab crontab
