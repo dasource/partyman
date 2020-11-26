@@ -6,7 +6,7 @@ elif (( $# > 0 )); then
     if [ -z "$NODE_ID" ]; then
         docker-compose exec partyman /root/particlcore/particl-cli $@
     else
-        bash -c "docker exec -it partyman_partyman.1.${NODE_ID} /root/particlcore/particl-cli $@"
+        docker exec -ti partyman_partyman.1.$(docker service ps -f 'name=partyman_partyman.1' partyman_partyman -q --no-trunc | head -n1) /root/particlcore/particl-cli $@
     fi
 fi
 
