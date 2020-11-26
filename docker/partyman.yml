@@ -17,8 +17,12 @@ services:
       - traefik-public
       - partyman
     volumes:
-      - particlcore:/root/particlcore
-      - particl_data:/root/.particl
+      - type: volume
+        source: particlcore
+        target: /root/particlcore
+      - type: volume
+        source: particl_data
+        target: /root/.particl
     env_file:
       - .env
     environment:
