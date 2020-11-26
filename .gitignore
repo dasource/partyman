@@ -7,7 +7,6 @@ webserver/hosts.allow
 
 .DS_Store
 .idea
-docker/docker-build-push.sh
 docker/data/particlcore
 docker/logs/cron.log
 docker/logs/debug.log

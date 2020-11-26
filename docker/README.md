@@ -38,6 +38,7 @@ Run `docker-compose up -d`
 2. Configure Lets Encrypt certificate resolver and Cloudflare DNS.
 3. Configure Basic Auth middleware.
 4. Run `./deploy-partyman.sh` to deploy the partyman stack.
+5. Wait for the blocks to get downloaded.
 5. Done, the partyman status should now be available at [https://partyman.yourdomain.com](https://partyman.yourdomain.com).
 
 ### Lets Encrypt + Cloudflare DNS
