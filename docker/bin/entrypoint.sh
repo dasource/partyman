@@ -30,6 +30,8 @@ cron
 echo
 
 echo "starting webserver..."
+echo "include_path = \".:./public_html:/usr/share/php\"" >> /etc/php/7.2/cli/php.ini
+rm webserver/hosts.allow
 cd webserver
 ./webserver start
 echo

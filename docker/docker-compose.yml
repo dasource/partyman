@@ -15,15 +15,18 @@ services:
     command: bin/entrypoint.sh
     ports:
       - "8080:8080"
-      - "61738:51738"
+      - "51738:51738"
     volumes:
-      - particlcore:/root/particlcore
+#      - particlcore:/root/particlcore
+      - ./data/particlcore:/root/particlcore
       - particl_data:/root/.particl
       - ./conf/particl.conf:/root/.particl/particl.conf
       - ./conf/crontab:/root/partyman/crontab
       - ./logs/debug.log:/root/.particl/debug.log
       - ./logs/cron.log:/root/partyman/cron.log
-#      - ./data/wallet.dat:/root/.particl/wallet.dat
+
+      - ../lib/functions.sh:/root/partyman/lib/functions.sh
+      - ../bin/partyman.sh:/root/partyman/bin/partyman.sh
     environment:
       - PARTICL_DIR=/root/particlcore
       - PARTICL_DATADIR=/root/.particl

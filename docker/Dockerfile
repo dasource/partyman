@@ -12,7 +12,7 @@ ENV TERM xterm
 
 RUN apt-get update -y \
     && apt-get install -y software-properties-common apt-utils wget curl net-tools iputils-ping ntp ntpdate python git \
-       unzip pv jq dnsutils netcat-openbsd locales cron php7.2 \
+       unzip pv jq dnsutils netcat-openbsd locales cron php7.2 nano \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -28,12 +28,16 @@ RUN echo ${CONTAINER_TIMEZONE} >/etc/timezone && \
 RUN ntpdate -q ntp.ubuntu.com
 
 WORKDIR /root
+# TODO: change
 RUN git clone https://github.com/xludx/partyman.git
 
 WORKDIR /root/partyman
+# TODO: change
+RUN git checkout dockerized
 COPY bin/entrypoint.sh bin/entrypoint.sh
 COPY bin/cron.sh bin/cron.sh
 COPY conf/crontab crontab
 
+#COPY ./data/particlcore /root/particlcore
 RUN ./partyman install unattended
 
