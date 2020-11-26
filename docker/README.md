@@ -24,11 +24,27 @@ Run `docker-compose up -d`
 4. Create new wallet `./partyman.sh stakingnode init` and write down your recovery phrase.
 5. Create a Cold Staking Public Key `./partyman.sh stakingnode new`.
 6. Enter the created Cold Staking Public Key to your Particl Wallet.
-7. Done, the partyman status should now be available at http://localhost:8080
+7. Done, the partyman status should now be available at [http://localhost:8080](http://localhost:8080).
 
 # Usage
 
-Use `./partyman.sh` to run the partyman script inside the running container.
-Use `./particl-cli.sh` to run particl-cli inside the running container.
+- Use `./partyman.sh` to run the partyman script inside the running container.
+- Use `./particl-cli.sh` to run particl-cli inside the running container.
 
-## Install (using docker swarm)
+## Install (docker swarm + Traefik)
+
+0. [Create Swarm mode cluster](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/) first.
+1. Create .env based on the example, configure your domain and traefik shared proxy network.
+2. Configure Lets Encrypt certificate resolver and Cloudflare DNS.
+3. Configure Basic Auth middleware.
+4. Run `./deploy-partyman.sh` to deploy the partyman stack.
+5. Done, the partyman status should now be available at [https://partyman.yourdomain.com](https://partyman.yourdomain.com).
+
+### Lets Encrypt + Cloudflare DNS
+
+TODO
+
+### Basic Auth
+
+TODO
+

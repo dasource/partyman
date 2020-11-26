@@ -32,7 +32,7 @@ WORKDIR /root
 RUN git clone https://github.com/xludx/partyman.git
 
 WORKDIR /root/partyman
-# TODO: change
+# TODO: remove
 RUN git checkout dockerized
 COPY bin/entrypoint.sh bin/entrypoint.sh
 COPY bin/cron.sh bin/cron.sh

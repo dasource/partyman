@@ -1,0 +1,43 @@
+version: '3.6'
+
+networks:
+  partyman:
+  traefik-public:
+    external: true
+
+volumes:
+  particl_data:
+  particlcore:
+
+services:
+  partyman:
+    image: ludx/partyman:latest
+    command: bin/entrypoint.sh
+    networks:
+      - traefik-public
+      - faucet
+    volumes:
+      - particlcore:/root/particlcore
+      - particl_data:/root/.particl
+    env_file:
+      - .env
+    environment:
+      - PARTICL_DIR=/root/particlcore
+      - PARTICL_DATADIR=/root/.particl
+      - PARTYMAN_DIR=/root/partyman
+      - HTML_PATH=/root/partyman/webserver/public_html
+      - DEBUG=0
+      - PRINTTOCONSOLE=1
+    deploy:
+      placement:
+        constraints:
+          - node.labels.${STACK_NAME}.partyman == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=${TRAEFIK_NETWORK}"
+        - "traefik.http.routers.partyman.rule=Host(`partyman.${UI_DOMAIN?UI_DOMAIN not set}`)"
+        - "traefik.http.services.partyman.loadbalancer.server.port=8080"
+        - "traefik.http.routers.partyman.entrypoints=websecure"
+        - "traefik.http.routers.partyman.tls=true"
+        - "traefik.http.routers.partyman.tls.certresolver=dns-cloudflare"
+        - "traefik.http.routers.partyman.middlewares=auth@file"
