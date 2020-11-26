@@ -15,7 +15,7 @@ services:
     command: bin/entrypoint.sh
     networks:
       - traefik-public
-      - faucet
+      - partyman
     volumes:
       - particlcore:/root/particlcore
       - particl_data:/root/.particl
