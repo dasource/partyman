@@ -1,17 +1,20 @@
 # dockerized partyman
 
-Easily setup and run partyman using Docker. This docker setup makes sure to always pull the latest / most stable version of partyman.
+Easily setup and run partyman using Docker. This docker setup makes sure to always pull the latest / most stable version of partyman and particl-core.
 
 ## TL;DR
 
-Run `docker-compose up -d`
+```
+docker-compose up -d
+./partyman.sh stakingnode init
+./partyman.sh stakingnode new
+```
 
 ## Requirements
 
 * Docker installed and running
   * [Install Docker](https://docs.docker.com/get-docker/)
   * [Install Docker Compose](https://docs.docker.com/compose/install/)
-* ...
 
 ## Install (docker-compose)
 
@@ -26,10 +29,9 @@ Run `docker-compose up -d`
 6. Enter the created Cold Staking Public Key to your Particl Wallet.
 7. Done, the partyman status should now be available at [http://localhost:8080](http://localhost:8080).
 
-# Usage
+### Basic Auth
 
-- Use `./partyman.sh` to run the partyman script inside the running container.
-- Use `./particl-cli.sh` to run particl-cli inside the running container.
+TODO
 
 ## Install (docker swarm + Traefik)
 
@@ -50,4 +52,10 @@ TODO
 ### Basic Auth
 
 TODO
+
+# Usage
+
+- `./partyman.sh` to run the partyman script in the container.
+- `./particl-cli.sh` to run particl-cli in the container.
+- `./bash.sh` to get a bash shell in the container.
 
