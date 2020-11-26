@@ -47,7 +47,7 @@ die() { [[ $QUIET ]] || echo -e "$C_RED$1$C_NORM" ; exit 1 ; }
 
 quit(){ [[ $QUIET ]] || echo -e "$C_GREEN${1:-${messages["exiting"]}}$C_NORM" ; echo ; exit 0 ; }
 
-confirm() { read -r -p "$(echo -e "${1:-${messages["prompt_are_you_sure"]} [y/N]}")" ; [[ ${REPLY:0:1} = [Yy] ]]; }
+confirm() { [[ $QUIET ]] || read -r -p "$(echo -e "${1:-${messages["prompt_are_you_sure"]} [y/N]}")" ; [[ ${REPLY:0:1} = [Yy] ]]; }
 
 
 up()     { echo -e "\e[${1:-1}A"; }
