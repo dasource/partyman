@@ -8,3 +8,4 @@ webserver/hosts.allow
 .DS_Store
 .idea
 docker/docker-build-push.sh
+docker/data/particlcore
