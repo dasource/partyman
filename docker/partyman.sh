@@ -3,6 +3,7 @@ if (( $# == 0 )); then
     echo "usage: partyman.sh help"
     exit
 elif (( $# > 0 )); then
+    export NODE_ID=$(docker info -f '{{.Swarm.NodeID}}')
     if [ -z "$NODE_ID" ]; then
         docker-compose exec partyman /root/partyman/partyman $@
     else
