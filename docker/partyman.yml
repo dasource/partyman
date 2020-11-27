@@ -41,7 +41,7 @@ services:
       placement:
         constraints:
           - node.labels.${STACK_NAME}.partyman == true
-      resources:
+#      resources:
 #        limits:
 #          cpus: '1'
 #          memory: 1536M
