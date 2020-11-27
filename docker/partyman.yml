@@ -42,9 +42,9 @@ services:
         constraints:
           - node.labels.${STACK_NAME}.partyman == true
       resources:
-        limits:
+#        limits:
           cpus: '1'
-          memory: 1536M
+#          memory: 1536M
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=${TRAEFIK_NETWORK}"
