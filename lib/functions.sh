@@ -1056,7 +1056,7 @@ stakingnode_stats(){
         else
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
-        if [ ! "$LATEST_VERSION" == "$CURRENT_VERSION" ]; then
+        if [ "$LATEST_VERSION" -gt "$CURRENT_VERSION" ]; then
             die "\n - please upgrade to the latest version! ${messages["exiting"]}"
         fi
 
