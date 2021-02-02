@@ -1414,9 +1414,9 @@ get_particld_status(){
         if [ "$STAKING_CURRENT" == "true" ]; then STAKING_CURRENT=1; elif [ $STAKING_CURRENT == "false" ]; then STAKING_CURRENT=0; fi
         STAKING_STATUS=$(echo "$PARTYD_GETSTAKINGINFO" | grep cause | awk '{print $2}' | sed -e 's/[",]//g')
         STAKING_PERCENTAGE=$(echo "$PARTYD_GETSTAKINGINFO" | grep percentyearreward | awk '{print $2}' | sed -e 's/[",]//g')
-        STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g' | awk '{ printf( "%0.f\n", $1 ) }')
-        PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g' | awk '{ printf( "%0.f\n", $1 ) }')
-        PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g' | awk '{ printf( "%0.f\n", $1 ) }')
+        STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g')
+        PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g')
+        PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g')
 
         PARTYD_NETSTAKEWEIGHT=$((PARTYD_NETSTAKEWEIGHT / 100000000))
         PARTYD_STAKEWEIGHT=$((PARTYD_STAKEWEIGHT / 100000000))
@@ -1429,7 +1429,7 @@ get_particld_status(){
         PARTYD_GETCOLDSTAKINGINFO=$($PARTY_CLI getcoldstakinginfo 2>/dev/null);
         CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
         CSTAKING_CURRENT=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep currently_staking | awk '{print $2}' | sed -e 's/[",]//g')
-        CSTAKING_BALANCE=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep coin_in_coldstakeable_script | awk '{print $2}' | sed -e 's/[",]//g' | awk '{ printf( "%0.f\n", $1 ) }')
+        CSTAKING_BALANCE=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep coin_in_coldstakeable_script | awk '{print $2}' | sed -e 's/[",]//g')
     fi
 }
 
@@ -1518,12 +1518,12 @@ print_status() {
     if [ $PARTYD_RUNNING == 1 ]; then
         pending "${messages["breakline"]}" ; ok ""
         pending "${messages["status_stakeen"]}" ; if [ $STAKING_ENABLED -gt 0 ] ; then ok "${messages["YES"]} - $STAKING_PERCENTAGE%" ; else err "${messages["NO"]}" ; fi
-        pending "${messages["status_stakedi"]}" ; ok "$STAKING_DIFF"
-        pending "${messages["status_stakenw"]}" ; ok "$PARTYD_NETSTAKEWEIGHT"
+        pending "${messages["status_stakedi"]}" ; ok "$(printf "%'.0f" "$STAKING_DIFF")"
+        pending "${messages["status_stakenw"]}" ; ok "$(printf "%'.0f" "$PARTYD_NETSTAKEWEIGHT")"
         pending "${messages["breakline"]}" ; ok ""
         pending "${messages["status_stakecu"]}" ; if [ $STAKING_CURRENT -gt 0 ] ; then ok "${messages["YES"]}" ; else err "${messages["NO"]} - $STAKING_STATUS" ; fi
         pending "${messages["status_stakeww"]}" ; ok "$PARTYD_STAKEWEIGHTLINE"
-        pending "${messages["status_stakebl"]}" ; ok "$CSTAKING_BALANCE"
+        pending "${messages["status_stakebl"]}" ; ok "$(printf "%'.0f" "$CSTAKING_BALANCE")"
     fi
 
     if [ "$PUBLIC_PORT_CLOSED"  -gt 0 ]; then
