@@ -238,6 +238,17 @@ case "$1" in
             print_getinfo
             quit 'Exiting.'
             ;;
+        exportblindeddata)
+            COMMAND=$1
+            pending "${messages["gathering_info"]}"
+            _check_partyman_updates
+            _find_particl_directory
+            _get_versions
+            _export_blinded_data
+            ok " ${messages["done"]}"
+            echo
+            quit 'Exiting.'
+            ;;
         *)
             usage
             ;;

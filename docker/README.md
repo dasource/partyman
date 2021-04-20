@@ -22,7 +22,7 @@ docker-compose up -d
 2. Run `docker-compose up -d`, this will build the image downloading and installing the latest release of partyman and particl-core and then run the container.
 3. Wait for the blocks to get downloaded. While waiting, you could:
   - Run `./particl-cli.sh getblockcount` to check the blockcount from the running particld.
-  - Run `docker-compose logs -f` to follow the logs to see whats happening.
+  - Run `docker-compose logs -f` to follow the logs to see what's happening.
   - Run `./partyman.sh status` to check the status via partyman.
 4. Create new wallet `./partyman.sh stakingnode init` and write down your recovery phrase.
 5. Create a Cold Staking Public Key `./partyman.sh stakingnode new`.

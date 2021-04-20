@@ -18,7 +18,7 @@ The webserver comes with a basic built-in firewall. You can configure it inside 
 
 * Add one IP Address per line to whitelist
 * DEFAULT POLICY = DENY
-* Set hosts.allow file to empty to change DEFAULY POLICY = ALLOW
+* Set hosts.allow file to empty to change DEFAULT POLICY = ALLOW
 
 
 Step 3
@@ -29,7 +29,7 @@ usage: './webserver <command> [<hostname>:<port>]'
 
 Available commands:
 
-  start     Starts built-in web server server on specified hostname:port, default is 0.0.0.0:8080  
+  start     Starts built-in web server server on specified hostname:port, default is 0.0.0.0:8080
   stop      Stops the built-in web server
   restart   Stops and Starts on previously specified hostname:port
   status    Status of the process

@@ -108,6 +108,10 @@ usage(){
 
             ${messages["usage_version_description"]}
 
+        exportblindeddata
+
+            ${messages["usage_exportblindeddata_description"]}
+
 EOF
 }
 
@@ -1544,4 +1548,18 @@ show_message_configure() {
 
 get_public_ips() {
     PUBLIC_IPV4=$(dig -4 +short myip.opendns.com @resolver1.opendns.com)
+}
+
+_export_blinded_data() {
+    echo
+    pending " --> particl-cli filtertransactions \"{\\\"type\\\":\\\"anon\\\",\\\"count\\\":0,\\\"show_blinding_factors\\\":true,\\\"show_anon_spends\\\":true,\\\"show_change\\\":true}\""
+    FT_OUTPUT=$("$PARTY_CLI" filtertransactions "{\"type\":\"anon\",\"count\":0,\"show_blinding_factors\":true,\"show_anon_spends\":true,\"show_change\":true}")
+    echo
+    if [[ $a == z* ]]; then
+        echo "${FT_OUTPUT}"
+    else
+        echo "${FT_OUTPUT}" > "${PWD}/partyman_filtertransactions_anon.txt"
+        echo "Exported to ${PWD}/partyman_filtertransactions_anon.txt"
+    fi
+    echo
 }
