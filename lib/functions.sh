@@ -95,6 +95,12 @@ usage(){
             ${messages["usage_stakingnode_rewardaddress_description"]}
             ${messages["usage_stakingnode_smsgfeeratetarget_description"]}
 
+        proposal [list, vote, tally]
+
+            ${messages["usage_proposal_list"]}
+            ${messages["usage_proposal_vote"]}
+            ${messages["usage_proposal_tally"]}
+
         status
 
             ${messages["usage_status_description"]}
@@ -1131,21 +1137,21 @@ stakingnode_proposallist(){
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
-        PROPOSAL_DOWNLOAD_URL="https://raw.githubusercontent.com/particlcommunity/particl-proposals/master/testnet/metadata.txt"
-        echo
+        #PROPOSAL_DOWNLOAD_URL="https://raw.githubusercontent.com/dasource/partyman/master/votingproposals/testnet/metadata.txt"
+        #echo
 
-        pending " --> ${messages["proposal_get_active"]}"
-        $wget_cmd -O - $PROPOSAL_DOWNLOAD_URL | pv -trep -s27M -w80 -N proposal > "proposal"
-        if [ ! -e "proposal" ] ; then
-            echo -e "${C_RED}error ${messages["downloading"]} file"
-            echo -e "tried to get $PROPOSAL_DOWNLOAD_URL$C_NORM"
-            exit 1
-        else
-        ok "${messages["done"]}"
-        fi
+        #pending " --> ${messages["proposal_get_active"]}"
+        #$wget_cmd -O - $PROPOSAL_DOWNLOAD_URL | pv -trep -s27M -w80 -N proposal > "proposal"
+        #if [ ! -e "proposal" ] ; then
+        #    echo -e "${C_RED}error ${messages["downloading"]} file"
+        #    echo -e "tried to get $PROPOSAL_DOWNLOAD_URL$C_NORM"
+        #    exit 1
+        #else
+        #ok "${messages["done"]}"
+        #fi
 
         pending " --> ${messages["proposal_reading"]}"
-        PROPOSALLIST=$( cat proposal | jq -r .);
+        PROPOSALLIST=$( cat votingproposals/mainnet/metadata.txt | jq -r .);
 
         if [ -z "$PROPOSALLIST" ]; then
            rm -rf proposal
@@ -1177,7 +1183,7 @@ stakingnode_proposalvote(){
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
-        if [ ! -e "proposal" ] ; then
+        if [ ! -e "votingproposals/mainnet/metadata.txt" ] ; then
             die "\n - no proposal data exists, please type 'partyman proposal list' ${messages["exiting"]}"
         fi
 
@@ -1196,8 +1202,8 @@ stakingnode_proposalvote(){
         read -r proposalid
 
         pending "checking if valid proposal ... "
-        PROPOSAL_HEIGHT_START=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
-        PROPOSAL_HEIGHT_END=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
+        PROPOSAL_HEIGHT_START=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
+        PROPOSAL_HEIGHT_END=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
 
         if [ -z "$PROPOSAL_HEIGHT_START" ]; then
             die "\n - not a valid proposal id! ' ${messages["exiting"]}"
@@ -1212,7 +1218,7 @@ stakingnode_proposalvote(){
 
         ok "${messages["done"]}"
 
-        PROPOSALDETAILS=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
+        PROPOSALDETAILS=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
         printf '%s\n' "$PROPOSALDETAILS"
 
         echo
@@ -1249,7 +1255,7 @@ stakingnode_proposaltally(){
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
-        if [ ! -e "proposal" ] ; then
+        if [ ! -e "votingproposals/mainnet/metadata.txt" ] ; then
             die "\n - no proposal data exists, please type 'partyman proposal list' ${messages["exiting"]}"
         fi
 
@@ -1258,15 +1264,15 @@ stakingnode_proposaltally(){
         read -r proposalid
 
         pending "checking if valid proposal ... "
-        PROPOSAL_HEIGHT_START=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
-        PROPOSAL_HEIGHT_END=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
+        PROPOSAL_HEIGHT_START=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
+        PROPOSAL_HEIGHT_END=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
 
         if [ -z "$PROPOSAL_HEIGHT_START" ]; then
             die "\n - not a valid proposal id! ' ${messages["exiting"]}"
         fi
 
         ok "${messages["done"]}"
-        PROPOSALDETAILS=$( cat proposal | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
+        PROPOSALDETAILS=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
         printf '%s\n' "$PROPOSALDETAILS"
 
 
@@ -1348,14 +1354,14 @@ firewall_reset(){
 
 _get_particld_proc_status(){
     PARTYD_HASPID=0
-    if [ -e "$INSTALL_DIR/particl.pid" ] ; then
-        PARTYD_HASPID=$(ps --no-header "$(cat "$INSTALL_DIR/particl.pid" 2>/dev/null)" | wc -l);
+    if [ -e "$DATA_DIR/particl.pid" ] ; then
+        PARTYD_HASPID=$(ps --no-header "$(cat "$DATA_DIR/particl.pid" 2>/dev/null)" | wc -l);
     else
         if ! PARTYD_HASPID=$(pidof "$INSTALL_DIR/particld"); then
             PARTYD_HASPID=0
         fi
     fi
-    PARTYD_PID=$(pidof "$INSTALL_DIR/particld")
+    PARTYD_PID=$(pgrep --pidfile "$DATA_DIR/particl.pid")
 }
 
 get_particld_status(){

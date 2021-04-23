@@ -1,0 +1,18 @@
+[{
+  "proposalid": 100,
+  "network": "testnet",
+  "version": 1,
+  "blockheight_start": 922000,
+  "blockheight_end": 950000,
+  "link": "https://github.com/particl/ccs-proposals/pull/6",
+  "name": "Integrate Network Voting into CCS"
+},
+{
+  "proposalid": 101,
+  "network": "testnet",
+  "version": 1,
+  "blockheight_start": 589000,
+  "blockheight_end": 700000,
+  "link": "https://github.com/particl/ccs-proposals/pull/6",
+  "name": "Integrate Network Voting into CCS"
+}]

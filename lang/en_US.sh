@@ -91,6 +91,9 @@ messages=(
     ["usage_firewall_description"]="installs and configures the UFW firewall and allows ports 22,8080,51738 and 51938"
     ["usage_firewall_reset"]="disables the UFW firewall and resets the rules to default"
 
+    ["usage_proposal_list"]="[list] lists all available proposals to vote on"
+    ["usage_proposal_vote"]="[vote] vote on a proposal"
+    ["usage_proposal_tally"]="[tally] view results of proposals"
 
     ["to_start_particl"]="To start particld run:"
 
