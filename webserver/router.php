@@ -9,6 +9,11 @@ define("DIRECTORY_INDEX", "index.php");
 //$config["hostsAllowed"] = array("");
 $config["hostsAllowed"] = file('hosts.allow', FILE_IGNORE_NEW_LINES);
 
+//Force default policy to DENY if no file exists
+if (!file_exists('hosts.allow')) {
+    $config["hostsAllowed"] = array("255.255.255.255"); 
+}
+
 // Parse allowed host list
 if (!empty($config['hostsAllowed'])) {
     if (!in_array($_SERVER['REMOTE_ADDR'], $config['hostsAllowed'])) {
