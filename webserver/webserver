@@ -75,6 +75,7 @@ fi
 # pidfile contents would be hostname:port:pid
 PIDFILE="$NAME".pid
 LOGFILE="$NAME".log
+HOSTFILE="hosts.allow"
 
 validate_server () {
   which php &> /dev/null
@@ -97,6 +98,11 @@ start_server () {
   validate_server
   if [[ $? -eq 1 ]]; then
     return 1
+  fi
+
+  if [[ ! -e "$HOSTFILE" ]]; then
+    touch $HOSTFILE
+    echo "255.255.255.255" >> $HOSTFILE
   fi
 
   if [[ -e "$PIDFILE" ]]; then
