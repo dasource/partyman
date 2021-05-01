@@ -310,7 +310,7 @@ _get_versions() {
     _get_platform_info
 
     if [ -z "$PARTY_CLI" ]; then PARTY_CLI='echo'; fi
-    CURRENT_VERSION=$( $PARTY_CLI --version | grep -m1 Particl | sed 's/\Particl Core RPC client version v//g' | sed 's/\.[^.]*$//' 2>/dev/null ) 2>/dev/null
+    CURRENT_VERSION=$( $PARTY_CLI --version | grep -o '\([0-9]*\.\)\{3\}[0-9]*' ) 2>/dev/null
 
     unset LATEST_VERSION
     LVCOUNTER=0
