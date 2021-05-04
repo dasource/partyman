@@ -364,7 +364,7 @@ restart_particld(){
     if [ "$PARTYD_RUNNING" == 1 ]; then
         pending " --> ${messages["stopping"]} particld. ${messages["please_wait"]}"
         if systemctl --user stop particld.service ; then
-            echo "Particld.service stopped"
+            echo "particld.service stopped"
         else
           $PARTY_CLI stop > /dev/null 2>&1
           sleep 15
@@ -372,7 +372,6 @@ restart_particld(){
         fi
         ok "${messages["done"]}"
         PARTYD_RUNNING=0
-
     fi
 
     #pending " --> ${messages["deleting_cache_files"]} $DATA_DIR/ "
@@ -386,7 +385,7 @@ restart_particld(){
 
     pending " --> ${messages["starting_particld"]}"
     if systemctl --user start particld.service ; then
-        echo "Particld.service started"
+        echo "particld.service started"
     else
       "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
     fi
@@ -727,7 +726,7 @@ update_particld(){
 
         pending " --> ${messages["launching"]} particld... "
         if systemctl --user restart particld.service ; then
-            echo "restarting particld.service"
+            echo "particld.service restarted"
         else
           "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
         fi
