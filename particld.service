@@ -4,11 +4,10 @@ After=network.target
 
 [Service]
 Type=forking
-PIDFile=/home/particl/.particl/particl.pid
-ExecStart=/home/particl/particlcore/particld -daemon -pid=/home/particl/.particl/particl.pid \
--conf=/home/particl/.particl/particl.conf -datadir=/home/particl/.particl
+PIDFile=%h/.particl/particl.pid
+ExecStart=%h/particlcore/particld -daemon -pid=%h/.particl/particl.pid -conf=%h/.particl/particl.conf -datadir=%h/.particl
 
-ExecStop=/home/particl/particlcore/particl-cli -conf=/home/particl/.particl/particl.conf stop
+ExecStop=%h/particlcore/particl-cli -conf=%h/.particl/particl.conf stop
 ExecStop=/usr/bin/sleep 25
 
 Restart=no
