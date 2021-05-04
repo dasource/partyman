@@ -1351,14 +1351,14 @@ firewall_reset(){
 
 _get_particld_proc_status(){
     PARTYD_HASPID=0
-    if [ -e "$DATA_DIR/particl.pid" ] ; then
-        PARTYD_HASPID=$(ps --no-header "$(cat "$DATA_DIR/particl.pid" 2>/dev/null)" | wc -l);
+    if [ -e "$DATA_DIR/particld.pid" ] ; then
+        PARTYD_HASPID=$(ps --no-header "$(cat "$DATA_DIR/particld.pid" 2>/dev/null)" | wc -l);
     else
         if ! PARTYD_HASPID=$(pidof "$INSTALL_DIR/particld"); then
             PARTYD_HASPID=0
         fi
     fi
-    PARTYD_PID=$(pgrep --pidfile "$DATA_DIR/particl.pid")
+    PARTYD_PID=$(pgrep --pidfile "$DATA_DIR/particld.pid")
 }
 
 get_particld_status(){
