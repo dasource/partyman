@@ -364,6 +364,7 @@ restart_particld(){
     if [ "$PARTYD_RUNNING" == 1 ]; then
         pending " --> ${messages["stopping"]} particld. ${messages["please_wait"]}"
         if systemctl --user stop particld.service ; then
+            echo "Particld.service stopped"
         else
           $PARTY_CLI stop > /dev/null 2>&1
           sleep 15
