@@ -1411,7 +1411,7 @@ get_particld_status(){
     #staking info
     if [ $PARTYD_RUNNING == 1 ]; then
         PARTYD_GETSTAKINGINFO=$($PARTY_CLI getstakinginfo 2>/dev/null);
-        if [ $PARTYD_GETSTAKINGINFO != *32601*]; then
+        if [ $PARTYD_GETSTAKINGINFO != error*]; then
             STAKING_ENABLED=$(echo "$PARTYD_GETSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
             if [ "$STAKING_ENABLED" == "true" ]; then STAKING_ENABLED=1; elif [ $STAKING_ENABLED == "false" ]; then STAKING_ENABLED=0; fi
             STAKING_CURRENT=$(echo "$PARTYD_GETSTAKINGINFO" | grep staking | awk '{print $2}' | sed -e 's/[",]//g')
