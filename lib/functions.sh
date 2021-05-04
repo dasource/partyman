@@ -363,24 +363,31 @@ restart_particld(){
 
     if [ "$PARTYD_RUNNING" == 1 ]; then
         pending " --> ${messages["stopping"]} particld. ${messages["please_wait"]}"
-        $PARTY_CLI stop > /dev/null 2>&1
-        sleep 15
-        killall -9 particld particl-shutoff 2>/dev/null
+        if systemctl --user stop particld.service ; then
+        else
+          $PARTY_CLI stop > /dev/null 2>&1
+          sleep 15
+          killall -9 particld particl-shutoff 2>/dev/null
+        fi
         ok "${messages["done"]}"
         PARTYD_RUNNING=0
+
     fi
 
-    pending " --> ${messages["deleting_cache_files"]} $DATA_DIR/ "
+    #pending " --> ${messages["deleting_cache_files"]} $DATA_DIR/ "
 
-    cd "$INSTALL_DIR" || exit
+    #cd "$INSTALL_DIR" || exit
 
     #rm -rf \
     #    "$DATA_DIR"/banlist.dat \
     #    "$DATA_DIR"/peers.dat
-    ok "${messages["done"]}"
+    #ok "${messages["done"]}"
 
     pending " --> ${messages["starting_particld"]}"
-    "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
+    if systemctl --user start particld.service ; then
+    else
+      "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
+    fi
     PARTYD_RUNNING=1
     PARTYD_RESPONDING=0
     ok "${messages["done"]}"
@@ -540,12 +547,12 @@ install_particld(){
     # autoboot it ------------------------------------------------------------
 
     INIT=$(ps --no-headers -o comm 1)
-    if [ "$INIT" == "systemd" ] && [ "$USER" == "particl" ]; then
+    if [ "$INIT" == "systemd" ]; then
         pending " --> detecting $INIT for auto boot ($USER) ... "
         ok "${messages["done"]}"
         pending " --> [systemd] installing service ... "
-        mkdir -p "/home/particl/.config/systemd/user/"
-        if cp -rf $PARTYMAN_GITDIR/particld.service /home/particl/.config/systemd/user/; then
+        mkdir -p /home/$USER/.config/systemd/user/
+        if cp -rf $PARTYMAN_GITDIR/particld.service /home/$USER/.config/systemd/user/; then
             ok "${messages["done"]}"
         fi
         pending " --> [systemd] reloading systemd service ... "
@@ -717,7 +724,10 @@ update_particld(){
         # punch it ---------------------------------------------------------------
 
         pending " --> ${messages["launching"]} particld... "
-        "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
+        if systemctl --user restart particld.service ; then
+        else
+          "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
+        fi
         ok "${messages["done"]}"
 
         # probe it ---------------------------------------------------------------
@@ -1411,28 +1421,30 @@ get_particld_status(){
     #staking info
     if [ $PARTYD_RUNNING == 1 ]; then
         PARTYD_GETSTAKINGINFO=$($PARTY_CLI getstakinginfo 2>/dev/null);
-        STAKING_ENABLED=$(echo "$PARTYD_GETSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
-        if [ "$STAKING_ENABLED" == "true" ]; then STAKING_ENABLED=1; elif [ $STAKING_ENABLED == "false" ]; then STAKING_ENABLED=0; fi
-        STAKING_CURRENT=$(echo "$PARTYD_GETSTAKINGINFO" | grep staking | awk '{print $2}' | sed -e 's/[",]//g')
-        if [ "$STAKING_CURRENT" == "true" ]; then STAKING_CURRENT=1; elif [ $STAKING_CURRENT == "false" ]; then STAKING_CURRENT=0; fi
-        STAKING_STATUS=$(echo "$PARTYD_GETSTAKINGINFO" | grep cause | awk '{print $2}' | sed -e 's/[",]//g')
-        STAKING_PERCENTAGE=$(echo "$PARTYD_GETSTAKINGINFO" | grep percentyearreward | awk '{print $2}' | sed -e 's/[",]//g')
-        STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g')
-        PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g')
-        PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g')
+        if [ $PARTYD_GETSTAKINGINFO != error* ]; then
+            STAKING_ENABLED=$(echo "$PARTYD_GETSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
+            if [ "$STAKING_ENABLED" == "true" ]; then STAKING_ENABLED=1; elif [ $STAKING_ENABLED == "false" ]; then STAKING_ENABLED=0; fi
+            STAKING_CURRENT=$(echo "$PARTYD_GETSTAKINGINFO" | grep staking | awk '{print $2}' | sed -e 's/[",]//g')
+            if [ "$STAKING_CURRENT" == "true" ]; then STAKING_CURRENT=1; elif [ $STAKING_CURRENT == "false" ]; then STAKING_CURRENT=0; fi
+            STAKING_STATUS=$(echo "$PARTYD_GETSTAKINGINFO" | grep cause | awk '{print $2}' | sed -e 's/[",]//g')
+            STAKING_PERCENTAGE=$(echo "$PARTYD_GETSTAKINGINFO" | grep percentyearreward | awk '{print $2}' | sed -e 's/[",]//g')
+            STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g')
+            PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g')
+            PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g')
 
-        PARTYD_NETSTAKEWEIGHT=$((PARTYD_NETSTAKEWEIGHT / 100000000))
-        PARTYD_STAKEWEIGHT=$((PARTYD_STAKEWEIGHT / 100000000))
+            PARTYD_NETSTAKEWEIGHT=$((PARTYD_NETSTAKEWEIGHT / 100000000))
+            PARTYD_STAKEWEIGHT=$((PARTYD_STAKEWEIGHT / 100000000))
 
-        #Hack for floating point arithmetic
-        STAKEWEIGHTPERCENTAGE=$( awk "BEGIN {printf \"%.3f%%\", $PARTYD_STAKEWEIGHT/$PARTYD_NETSTAKEWEIGHT*100}" )
-        T_PARTYD_STAKEWEIGHT=$(printf "%'.0f" $PARTYD_STAKEWEIGHT)
-        PARTYD_STAKEWEIGHTLINE="$T_PARTYD_STAKEWEIGHT ($STAKEWEIGHTPERCENTAGE)"
+            #Hack for floating point arithmetic
+            STAKEWEIGHTPERCENTAGE=$( awk "BEGIN {printf \"%.3f%%\", $PARTYD_STAKEWEIGHT/$PARTYD_NETSTAKEWEIGHT*100}" )
+            T_PARTYD_STAKEWEIGHT=$(printf "%'.0f" $PARTYD_STAKEWEIGHT)
+            PARTYD_STAKEWEIGHTLINE="$T_PARTYD_STAKEWEIGHT ($STAKEWEIGHTPERCENTAGE)"
 
-        PARTYD_GETCOLDSTAKINGINFO=$($PARTY_CLI getcoldstakinginfo 2>/dev/null);
-        CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
-        CSTAKING_CURRENT=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep currently_staking | awk '{print $2}' | sed -e 's/[",]//g')
-        CSTAKING_BALANCE=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep coin_in_coldstakeable_script | awk '{print $2}' | sed -e 's/[",]//g')
+            PARTYD_GETCOLDSTAKINGINFO=$($PARTY_CLI getcoldstakinginfo 2>/dev/null);
+            CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
+            CSTAKING_CURRENT=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep currently_staking | awk '{print $2}' | sed -e 's/[",]//g')
+            CSTAKING_BALANCE=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep coin_in_coldstakeable_script | awk '{print $2}' | sed -e 's/[",]//g')
+          fi
     fi
 }
 
