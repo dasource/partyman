@@ -230,18 +230,18 @@ _find_particl_directory() {
     elif [ -e "$HOME/.particl/particl-cli" ] ; then
         INSTALL_DIR="$HOME/.particl" ;
 
-    elif [ -e "$HOME/particlcore/particl-cli" ] ; then
-        INSTALL_DIR="$HOME/particlcore" ;
+    elif [ -e "$HOME/particl-core/particl-cli" ] ; then
+        INSTALL_DIR="$HOME/particl-core" ;
     fi
 
     if [ -n "$INSTALL_DIR" ]; then
         INSTALL_DIR=$(readlink -f "$INSTALL_DIR") 2>/dev/null
         if [ ! -e "$INSTALL_DIR" ]; then
-            echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/particlcore, or \$PATH. -- ${messages["exiting"]}$C_NORM"
+            echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/particl-core, or \$PATH. -- ${messages["exiting"]}$C_NORM"
             exit 1
         fi
     else
-        echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/particlcore, or \$PATH. -- ${messages["exiting"]}$C_NORM"
+        echo -e "${C_RED}${messages["particlcli_not_found_in_cwd"]}, ~/particl-core, or \$PATH. -- ${messages["exiting"]}$C_NORM"
         exit 1
     fi
 
@@ -405,7 +405,7 @@ restart_particld(){
 
 install_particld(){
 
-    INSTALL_DIR=$HOME/particlcore
+    INSTALL_DIR=$HOME/particl-core
     PARTY_CLI="$INSTALL_DIR/particl-cli"
 
     if [ -e "$INSTALL_DIR" ] ; then
