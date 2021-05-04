@@ -386,6 +386,7 @@ restart_particld(){
 
     pending " --> ${messages["starting_particld"]}"
     if systemctl --user start particld.service ; then
+        echo "Particld.service started"
     else
       "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
     fi
@@ -726,6 +727,7 @@ update_particld(){
 
         pending " --> ${messages["launching"]} particld... "
         if systemctl --user restart particld.service ; then
+            echo "restarting particld.service"
         else
           "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
         fi
