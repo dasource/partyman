@@ -1411,30 +1411,28 @@ get_particld_status(){
     #staking info
     if [ $PARTYD_RUNNING == 1 ]; then
         PARTYD_GETSTAKINGINFO=$($PARTY_CLI getstakinginfo 2>/dev/null);
-        if [ $PARTYD_GETSTAKINGINFO != "error code: -32601"]; then
-            STAKING_ENABLED=$(echo "$PARTYD_GETSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
-            if [ "$STAKING_ENABLED" == "true" ]; then STAKING_ENABLED=1; elif [ $STAKING_ENABLED == "false" ]; then STAKING_ENABLED=0; fi
-            STAKING_CURRENT=$(echo "$PARTYD_GETSTAKINGINFO" | grep staking | awk '{print $2}' | sed -e 's/[",]//g')
-            if [ "$STAKING_CURRENT" == "true" ]; then STAKING_CURRENT=1; elif [ $STAKING_CURRENT == "false" ]; then STAKING_CURRENT=0; fi
-            STAKING_STATUS=$(echo "$PARTYD_GETSTAKINGINFO" | grep cause | awk '{print $2}' | sed -e 's/[",]//g')
-            STAKING_PERCENTAGE=$(echo "$PARTYD_GETSTAKINGINFO" | grep percentyearreward | awk '{print $2}' | sed -e 's/[",]//g')
-            STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g')
-            PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g')
-            PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g')
-        
-            PARTYD_NETSTAKEWEIGHT=$((PARTYD_NETSTAKEWEIGHT / 100000000))
-            PARTYD_STAKEWEIGHT=$((PARTYD_STAKEWEIGHT / 100000000))
+        STAKING_ENABLED=$(echo "$PARTYD_GETSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
+        if [ "$STAKING_ENABLED" == "true" ]; then STAKING_ENABLED=1; elif [ $STAKING_ENABLED == "false" ]; then STAKING_ENABLED=0; fi
+        STAKING_CURRENT=$(echo "$PARTYD_GETSTAKINGINFO" | grep staking | awk '{print $2}' | sed -e 's/[",]//g')
+        if [ "$STAKING_CURRENT" == "true" ]; then STAKING_CURRENT=1; elif [ $STAKING_CURRENT == "false" ]; then STAKING_CURRENT=0; fi
+        STAKING_STATUS=$(echo "$PARTYD_GETSTAKINGINFO" | grep cause | awk '{print $2}' | sed -e 's/[",]//g')
+        STAKING_PERCENTAGE=$(echo "$PARTYD_GETSTAKINGINFO" | grep percentyearreward | awk '{print $2}' | sed -e 's/[",]//g')
+        STAKING_DIFF=$(echo "$PARTYD_GETSTAKINGINFO" | grep difficulty | awk '{print $2}' | sed -e 's/[",]//g')
+        PARTYD_STAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep "\"weight"\" | awk '{print $2}' | sed -e 's/[",]//g')
+        PARTYD_NETSTAKEWEIGHT=$(echo "$PARTYD_GETSTAKINGINFO" | grep netstakeweight | awk '{print $2}' | sed -e 's/[",]//g')
 
-            #Hack for floating point arithmetic
-            STAKEWEIGHTPERCENTAGE=$( awk "BEGIN {printf \"%.3f%%\", $PARTYD_STAKEWEIGHT/$PARTYD_NETSTAKEWEIGHT*100}" )
-            T_PARTYD_STAKEWEIGHT=$(printf "%'.0f" $PARTYD_STAKEWEIGHT)
-            PARTYD_STAKEWEIGHTLINE="$T_PARTYD_STAKEWEIGHT ($STAKEWEIGHTPERCENTAGE)"
+        PARTYD_NETSTAKEWEIGHT=$((PARTYD_NETSTAKEWEIGHT / 100000000))
+        PARTYD_STAKEWEIGHT=$((PARTYD_STAKEWEIGHT / 100000000))
 
-            PARTYD_GETCOLDSTAKINGINFO=$($PARTY_CLI getcoldstakinginfo 2>/dev/null);
-            CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
-            CSTAKING_CURRENT=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep currently_staking | awk '{print $2}' | sed -e 's/[",]//g')
-            CSTAKING_BALANCE=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep coin_in_coldstakeable_script | awk '{print $2}' | sed -e 's/[",]//g')
-          fi
+        #Hack for floating point arithmetic
+        STAKEWEIGHTPERCENTAGE=$( awk "BEGIN {printf \"%.3f%%\", $PARTYD_STAKEWEIGHT/$PARTYD_NETSTAKEWEIGHT*100}" )
+        T_PARTYD_STAKEWEIGHT=$(printf "%'.0f" $PARTYD_STAKEWEIGHT)
+        PARTYD_STAKEWEIGHTLINE="$T_PARTYD_STAKEWEIGHT ($STAKEWEIGHTPERCENTAGE)"
+
+        PARTYD_GETCOLDSTAKINGINFO=$($PARTY_CLI getcoldstakinginfo 2>/dev/null);
+        CSTAKING_ENABLED=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep enabled | awk '{print $2}' | sed -e 's/[",]//g')
+        CSTAKING_CURRENT=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep currently_staking | awk '{print $2}' | sed -e 's/[",]//g')
+        CSTAKING_BALANCE=$(echo "$PARTYD_GETCOLDSTAKINGINFO" | grep coin_in_coldstakeable_script | awk '{print $2}' | sed -e 's/[",]//g')
     fi
 }
 
