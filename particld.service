@@ -3,9 +3,6 @@ Description=Particl daemon
 After=network.target
 
 [Service]
-User=particl
-Group=particl
-
 Type=forking
 PIDFile=/home/particl/.particl/particld.pid
 ExecStart=/home/particl/particlcore/particld -daemon -pid=/home/particl/.particl/particld.pid \
