@@ -540,27 +540,28 @@ install_particld(){
     # autoboot it ------------------------------------------------------------
 
     INIT=$(ps --no-headers -o comm 1)
-    if [ "$INIT" == "systemd" ] && [ "$USER" == "particl" ] && [ -n "$SUDO_USER" ]; then
+    if [ "$INIT" == "systemd" ] && [ "$USER" == "particl" ]; then
         pending " --> detecting $INIT for auto boot ($USER) ... "
         ok "${messages["done"]}"
-        DOWNLOAD_SERVICE="https://raw.githubusercontent.com/particl/particl-core/master/contrib/init/particld.service"
-        pending " --> [systemd] ${messages["downloading"]} ${DOWNLOAD_SERVICE}... "
-        $wget_cmd -O - $DOWNLOAD_SERVICE | pv -trep -w80 -N service > particld.service
-        if [ ! -e particld.service ] ; then
-           echo -e "${C_RED}error ${messages["downloading"]} file"
-           echo -e "tried to get particld.service$C_NORM"
-        else
-           ok "${messages["done"]}"
+        # DOWNLOAD_SERVICE="https://raw.githubusercontent.com/particl/particl-core/master/contrib/init/particld.service"
+        # pending " --> [systemd] ${messages["downloading"]} ${DOWNLOAD_SERVICE}... "
+        # $wget_cmd -O - $DOWNLOAD_SERVICE | pv -trep -w80 -N service > particld.service
+        # if [ ! -e particld.service ] ; then
+        #    echo -e "${C_RED}error ${messages["downloading"]} file"
+        #    echo -e "tried to get particld.service$C_NORM"
+        # else
+        #    ok "${messages["done"]}"
         pending " --> [systemd] installing service ... "
-        if sudo cp -rf particld.service /etc/systemd/system/; then
+        mkdir -p "/home/particl/.config/systemd/user/"
+        if cp -rf $PARTYMAN_GITDIR/particld.service /home/particl/.config/systemd/user/; then
             ok "${messages["done"]}"
         fi
            pending " --> [systemd] reloading systemd service ... "
-        if sudo systemctl daemon-reload; then
+        if systemctl --user daemon-reload; then
             ok "${messages["done"]}"
         fi
            pending " --> [systemd] enable particld system startup ... "
-        if sudo systemctl enable particld; then
+        if sudo systemctl --user enable particld; then
                ok "${messages["done"]}"
            fi
         fi
