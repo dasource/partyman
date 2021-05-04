@@ -364,13 +364,13 @@ restart_particld(){
     if [ "$PARTYD_RUNNING" == 1 ]; then
         pending " --> ${messages["stopping"]} particld. ${messages["please_wait"]}"
         if systemctl --user stop particld.service ; then
-            echo "particld.service stopped"
+          ok "${messages["done"]}"
         else
           $PARTY_CLI stop > /dev/null 2>&1
           sleep 15
           killall -9 particld particl-shutoff 2>/dev/null
+          ok "${messages["done"]}"
         fi
-        ok "${messages["done"]}"
         PARTYD_RUNNING=0
     fi
 
@@ -385,13 +385,13 @@ restart_particld(){
 
     pending " --> ${messages["starting_particld"]}"
     if systemctl --user start particld.service ; then
-        echo "particld.service started"
+      ok "${messages["done"]}"
     else
       "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
+      ok "${messages["done"]}"
     fi
     PARTYD_RUNNING=1
     PARTYD_RESPONDING=0
-    ok "${messages["done"]}"
 
     pending " --> ${messages["waiting_for_particld_to_respond"]}"
     echo -en "${C_YELLOW}"
@@ -726,11 +726,11 @@ update_particld(){
 
         pending " --> ${messages["launching"]} particld... "
         if systemctl --user restart particld.service ; then
-            echo "particld.service restarted"
+          ok "${messages["done"]}"
         else
           "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
+          ok "${messages["done"]}"
         fi
-        ok "${messages["done"]}"
 
         # probe it ---------------------------------------------------------------
 
