@@ -366,6 +366,7 @@ restart_particld(){
         if systemctl --user stop particld.service ; then
           ok "${messages["done"]}"
         else
+          pending " --> ${messages["systemd stop failed, attempting fallback"]}"
           $PARTY_CLI stop > /dev/null 2>&1
           sleep 15
           killall -9 particld particl-shutoff 2>/dev/null
@@ -387,6 +388,7 @@ restart_particld(){
     if systemctl --user start particld.service ; then
       ok "${messages["done"]}"
     else
+      pending " --> ${messages["systemd start failed, attempting fallback"]}"
       "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
       ok "${messages["done"]}"
     fi
@@ -553,7 +555,11 @@ install_particld(){
         ok "${messages["done"]}"
         pending " --> [systemd] installing service ... "
         mkdir -p /home/$USER/.config/systemd/user/
-        if cp -rf $PARTYMAN_GITDIR/particld.service /home/$USER/.config/systemd/user/; then
+        if cp -f $PARTYMAN_GITDIR/particld.service /home/$USER/.config/systemd/user/; then
+            ok "${messages["done"]}"
+        fi
+        pending " --> [systemd] enabling linger for $USER ... "
+        if sudo loginctl enable-linger $USER; then
             ok "${messages["done"]}"
         fi
         pending " --> [systemd] reloading systemd service ... "
@@ -728,6 +734,7 @@ update_particld(){
         if systemctl --user restart particld.service ; then
           ok "${messages["done"]}"
         else
+          pending " --> ${messages["systemd service failed, attempting fallback"]}"
           "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
           ok "${messages["done"]}"
         fi
