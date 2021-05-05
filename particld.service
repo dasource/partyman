@@ -7,15 +7,20 @@ Type=forking
 PIDFile=%h/.particl/particl.pid
 ExecStart=%h/particlcore/particld -daemon -pid=%h/.particl/particl.pid -conf=%h/.particl/particl.conf -datadir=%h/.particl
 
-ExecStop=%h/particlcore/particl-cli -conf=%h/.particl/particl.conf stop
-ExecStop=/usr/bin/sleep 25
-
-Restart=no
-PrivateTmp=true
-TimeoutStopSec=60s
-TimeoutStartSec=2s
 StartLimitInterval=120s
-StartLimitBurst=5
+StartLimitBurst=1
+
+Restart=on-failure
+TimeoutStopSec=600
+
+# Provide a private /tmp and /var/tmp.
+PrivateTmp=true
+
+# Mount /usr, /boot/ and /etc read-only for the process.
+ProtectSystem=full
+
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
