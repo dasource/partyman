@@ -362,6 +362,7 @@ start_particld(){
   if systemctl --user start particld.service > /dev/null 2>&1; then
     ok "${messages["started"]}"
   else
+    err "${messages["FAILED"]}"
     pending " --> ${messages["starting_particld_fallback"]}"
     "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
     ok "${messages["started"]}"
@@ -562,17 +563,23 @@ install_particld(){
         pending " --> [systemd] enabling linger for user '$USER'... "
         if sudo loginctl enable-linger $USER > /dev/null 2>&1; then
             ok "${messages["done"]}"
-        else err "${messages["FAILED"]}"
+        else
+            err "${messages["FAILED"]}"
+            exit 1
         fi
         pending " --> [systemd] reloading systemd service ... "
         if systemctl --user daemon-reload > /dev/null 2>&1; then
             ok "${messages["done"]}"
-        else err "${messages["FAILED"]}"
+        else
+            err "${messages["FAILED"]}"
+            exit 1
         fi
         pending " --> [systemd] enable particld.service at system startup ... "
         if systemctl --user enable particld > /dev/null 2>&1; then
-               ok "${messages["done"]}"
-        else err "${messages["FAILED"]}"
+            ok "${messages["done"]}"
+        else
+            err "${messages["FAILED"]}"
+            exit 1
         fi
     fi
 
