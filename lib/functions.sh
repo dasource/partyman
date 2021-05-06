@@ -359,7 +359,7 @@ _check_particld_state() {
 start_particld(){
 
   pending " --> ${messages["starting_particld"]}"
-  if systemctl --user start particld.service ; then
+  if [ systemctl --user start particld.service > /dev/null 2>&1 ] ; then
     ok "${messages["started"]}"
   else
     pending " --> ${messages["starting_particld_fallback"]}"

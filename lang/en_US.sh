@@ -29,6 +29,7 @@ messages=(
     ["unpacking"]="Unpacking"
     ["stopping"]="Stopping"
     ["stopped"]="Stopped!"
+    ["started"]="Started!"
     ["removing_old_version"]="Removing old version... "
     ["please_wait"]="Please wait..."
     ["try_again_later"]="Try again later."
