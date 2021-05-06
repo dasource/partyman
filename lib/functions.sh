@@ -557,18 +557,22 @@ install_particld(){
         mkdir -p /home/$USER/.config/systemd/user/
         if cp -f $PARTYMAN_GITDIR/particld.service /home/$USER/.config/systemd/user/; then
             ok "${messages["done"]}"
+        else err "${messages["FAILED"]}"
         fi
         pending " --> [systemd] enabling linger for user '$USER'... "
-        if sudo loginctl enable-linger $USER; then
+        if [ sudo loginctl enable-linger $USER > /dev/null 2>&1 ]; then
             ok "${messages["done"]}"
+        else err "${messages["FAILED"]}"
         fi
         pending " --> [systemd] reloading systemd service ... "
-        if systemctl --user daemon-reload; then
+        if [ systemctl --user daemon-reload > /dev/null 2>&1 ]; then
             ok "${messages["done"]}"
+        else err "${messages["FAILED"]}"
         fi
         pending " --> [systemd] enable particld.service at system startup ... "
-        if systemctl --user enable particld; then
+        if [ systemctl --user enable particld > /dev/null 2>&1 ]; then
                ok "${messages["done"]}"
+        else err "${messages["FAILED"]}"
         fi
     fi
 
