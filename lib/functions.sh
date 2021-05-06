@@ -359,7 +359,7 @@ _check_particld_state() {
 start_particld(){
 
   pending " --> ${messages["starting_particld"]}"
-  if [ systemctl --user start particld.service > /dev/null 2>&1 ] ; then
+  if systemctl --user start particld.service > /dev/null 2>&1; then
     ok "${messages["started"]}"
   else
     pending " --> ${messages["starting_particld_fallback"]}"
@@ -391,7 +391,7 @@ stop_particld(){
 
   if [ "$PARTYD_RUNNING" == 1 ]; then
       pending " --> ${messages["stopping_particld"]}"
-      if [ systemctl --user stop particld.service > /dev/null 2>&1 ] ; then
+      if systemctl --user stop particld.service > /dev/null 2>&1; then
         ok "${messages["stopped"]}"
       else
         err "${messages["FAILED"]}"
@@ -403,7 +403,7 @@ stop_particld(){
       fi
       PARTYD_RUNNING=0
   else
-    warn "${messages["particld_not_running"]}"
+    err " --> ${messages["particld_not_running"]}"
   fi
 }
 
@@ -560,17 +560,17 @@ install_particld(){
         else err "${messages["FAILED"]}"
         fi
         pending " --> [systemd] enabling linger for user '$USER'... "
-        if [ sudo loginctl enable-linger $USER > /dev/null 2>&1 ]; then
+        if sudo loginctl enable-linger $USER > /dev/null 2>&1; then
             ok "${messages["done"]}"
         else err "${messages["FAILED"]}"
         fi
         pending " --> [systemd] reloading systemd service ... "
-        if [ systemctl --user daemon-reload > /dev/null 2>&1 ]; then
+        if systemctl --user daemon-reload > /dev/null 2>&1; then
             ok "${messages["done"]}"
         else err "${messages["FAILED"]}"
         fi
         pending " --> [systemd] enable particld.service at system startup ... "
-        if [ systemctl --user enable particld > /dev/null 2>&1 ]; then
+        if systemctl --user enable particld > /dev/null 2>&1; then
                ok "${messages["done"]}"
         else err "${messages["FAILED"]}"
         fi
