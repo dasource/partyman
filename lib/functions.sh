@@ -1377,7 +1377,7 @@ get_particld_status(){
     if [ -z "$PARTYD_UPTIME" ] ; then PARTYD_UPTIME=0 ; fi
 
     PARTYD_LISTENING=$(netstat -nat | grep LIST | grep -c 51738);
-    PARTYD_CONNECTIONS=$(netstat -nat | grep ESTA | grep -c 51738);
+    PARTYD_CONNECTIONS=$("$PARTY_CLI" getconnectioncount 2>/dev/null);
     PARTYD_CURRENT_BLOCK=$("$PARTY_CLI" getblockcount 2>/dev/null)
     if [ -z "$PARTYD_CURRENT_BLOCK" ] ; then PARTYD_CURRENT_BLOCK=0 ; fi
 
