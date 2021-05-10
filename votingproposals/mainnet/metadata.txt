@@ -1,9 +1,10 @@
 [{
   "proposalid": 7,
+  "name": "Delegated Output Claim Management",
   "network": "mainnet",
-  "version": 1,
   "blockheight_start": 936128,
   "blockheight_end": 941167,
-  "link": "https://github.com/particl/ccs-proposals/pull/7",
-  "name": "Delegated Output Claim Management"
+  "link-css": "https://ccs.particl.io/proposals/delegated-output-claim-management.html",
+  "link-github": "https://github.com/particl/ccs-proposals/pull/7",
+  "version": 1
 }]
