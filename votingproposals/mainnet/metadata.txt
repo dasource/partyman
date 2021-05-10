@@ -1,18 +1,9 @@
 [{
-  "proposalid": 1,
+  "proposalid": 7,
   "network": "mainnet",
   "version": 1,
-  "blockheight_start": 922000,
-  "blockheight_end": 950000,
-  "link": "https://github.com/particl/ccs-proposals/pull/6",
-  "name": "Integrate Network Voting into CCS"
-},
-{
-  "proposalid": 2,
-  "network": "mainnet",
-  "version": 1,
-  "blockheight_start": 589000,
-  "blockheight_end": 700000,
-  "link": "https://github.com/particl/ccs-proposals/pull/6",
-  "name": "Integrate Network Voting into CCS"
+  "blockheight_start": 936128,
+  "blockheight_end": 941167,
+  "link": "https://github.com/particl/ccs-proposals/pull/7",
+  "name": "Delegated Output Claim Management"
 }]
