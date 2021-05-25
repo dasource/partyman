@@ -4,7 +4,17 @@
   "network": "mainnet",
   "blockheight_start": 936128,
   "blockheight_end": 941167,
-  "link-css": "https://ccs.particl.io/proposals/delegated-output-claim-management.html",
+  "link-ccs": "https://ccs.particl.io/proposals/delegated-output-claim-management.html",
   "link-github": "https://github.com/particl/ccs-proposals/pull/7",
+  "version": 1
+  },
+{
+  "proposalid": 8,
+  "name": "Decentralized Treasury Model",
+  "network": "mainnet",
+  "blockheight_start": 946184,
+  "blockheight_end": 947263,
+  "link-ccs": "https://ccs.particl.io/proposals/ decentralized-treasury-model.html",
+  "link-github": "https://github.com/particl/ccs-proposals/pull/8",
   "version": 1
 }]
