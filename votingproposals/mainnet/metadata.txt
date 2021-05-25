@@ -13,7 +13,7 @@
   "name": "Decentralized Treasury Model",
   "network": "mainnet",
   "blockheight_start": 946184,
-  "blockheight_end": 947263,
+  "blockheight_end": 956263,
   "link-ccs": "https://ccs.particl.io/proposals/decentralized-treasury-model.html",
   "link-github": "https://github.com/particl/ccs-proposals/pull/8",
   "version": 1
