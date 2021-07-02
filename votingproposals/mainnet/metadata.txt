@@ -17,4 +17,14 @@
   "link-ccs": "https://ccs.particl.io/proposals/decentralized-treasury-model.html",
   "link-github": "https://github.com/particl/ccs-proposals/pull/8",
   "version": 1
+},
+{
+  "proposalid": 9,
+  "name": "Team Funding Request",
+  "network": "mainnet",
+  "blockheight_start": 971400,
+  "blockheight_end": 976439,
+  "link-ccs": "https://ccs.particl.io/proposals/team-funding-request-1.html",
+  "link-github": "https://github.com/particl/ccs-proposals/pull/9",
+  "version": 1
 }]
