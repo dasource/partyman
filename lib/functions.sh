@@ -81,8 +81,6 @@ usage(){
         restart [now]
 
             ${messages["usage_restart_description"]}
-                banlist.dat
-                peers.dat
 
             ${messages["usage_restart_description_now"]}
 
@@ -358,49 +356,72 @@ _check_particld_state() {
         PARTYD_TBALANCE=$( "$PARTY_CLI" getwalletinfo | jq -r .total_balance )
     fi
 }
+start_particld(){
 
-restart_particld(){
+  pending " --> ${messages["starting_particld"]}"
+  if systemctl --user start particld.service > /dev/null 2>&1; then
+    ok "${messages["started"]}"
+  else
+    err "${messages["FAILED"]}"
+    pending " --> ${messages["starting_particld_fallback"]}"
+    "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
+    ok "${messages["started"]}"
+  fi
+  PARTYD_RUNNING=1
+  PARTYD_RESPONDING=0
 
-    if [ "$PARTYD_RUNNING" == 1 ]; then
-        pending " --> ${messages["stopping"]} particld. ${messages["please_wait"]}"
+  pending " --> ${messages["waiting_for_particld_to_respond"]}"
+  echo -en "${C_YELLOW}"
+  while [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_RESPONDING == 0 ]; do
+      echo -n "."
+      _check_particld_state
+      sleep 5
+  done
+  if [ $PARTYD_RUNNING == 0 ]; then
+      die "\n - particld unexpectedly quit. ${messages["exiting"]}"
+  fi
+  ok "${messages["done"]}"
+  pending " --> particl-cli getinfo"
+  echo
+  $PARTY_CLI -getinfo
+  echo
+
+}
+
+stop_particld(){
+
+  if [ "$PARTYD_RUNNING" == 1 ]; then
+      pending " --> ${messages["stopping_particld"]}"
+      if systemctl --user stop particld.service > /dev/null 2>&1; then
+        ok "${messages["stopped"]}"
+      else
+        err "${messages["FAILED"]}"
+        pending " --> ${messages["stopping_particld_fallback"]} "
         $PARTY_CLI stop > /dev/null 2>&1
         sleep 15
         killall -9 particld particl-shutoff 2>/dev/null
-        ok "${messages["done"]}"
-        PARTYD_RUNNING=0
-    fi
+        ok "${messages["stopped"]}"
+      fi
+      PARTYD_RUNNING=0
+  else
+    err " --> ${messages["particld_not_running"]}"
+  fi
+}
 
-    pending " --> ${messages["deleting_cache_files"]} $DATA_DIR/ "
+restart_particld(){
 
-    cd "$INSTALL_DIR" || exit
+    stop_particld
+
+    #pending " --> ${messages["deleting_cache_files"]} $DATA_DIR/ "
+
+    #cd "$INSTALL_DIR" || exit
 
     #rm -rf \
     #    "$DATA_DIR"/banlist.dat \
     #    "$DATA_DIR"/peers.dat
-    ok "${messages["done"]}"
+    #ok "${messages["done"]}"
 
-    pending " --> ${messages["starting_particld"]}"
-    "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
-    PARTYD_RUNNING=1
-    PARTYD_RESPONDING=0
-    ok "${messages["done"]}"
-
-    pending " --> ${messages["waiting_for_particld_to_respond"]}"
-    echo -en "${C_YELLOW}"
-    while [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_RESPONDING == 0 ]; do
-        echo -n "."
-        _check_particld_state
-        sleep 5
-    done
-    if [ $PARTYD_RUNNING == 0 ]; then
-        die "\n - particld unexpectedly quit. ${messages["exiting"]}"
-    fi
-    ok "${messages["done"]}"
-    pending " --> particl-cli getinfo"
-    echo
-    $PARTY_CLI -getinfo
-    echo
-
+    start_particld
 }
 
 install_particld(){
@@ -496,16 +517,6 @@ install_particld(){
     tar zxf "$DOWNLOAD_FILE" && \
     ok "${messages["done"]}"
 
-    # pummel it --------------------------------------------------------------
-
-    if [ $PARTYD_RUNNING == 1 ]; then
-        pending " --> ${messages["stopping"]} partcld. ${messages["please_wait"]}"
-        $PARTY_CLI stop >/dev/null 2>&1
-        sleep 15
-        killall -9 particld particl-shutoff >/dev/null 2>&1
-        ok "${messages["done"]}"
-    fi
-
     # place it ---------------------------------------------------------------
 
     mv "particl-$LATEST_VERSION/bin/particld" "particld-$LATEST_VERSION"
@@ -540,29 +551,35 @@ install_particld(){
     # autoboot it ------------------------------------------------------------
 
     INIT=$(ps --no-headers -o comm 1)
-    if [ "$INIT" == "systemd" ] && [ "$USER" == "particl" ] && [ -n "$SUDO_USER" ]; then
+    if [ "$INIT" == "systemd" ]; then
         pending " --> detecting $INIT for auto boot ($USER) ... "
         ok "${messages["done"]}"
-        DOWNLOAD_SERVICE="https://raw.githubusercontent.com/particl/particl-core/master/contrib/init/particld.service"
-        pending " --> [systemd] ${messages["downloading"]} ${DOWNLOAD_SERVICE}... "
-        $wget_cmd -O - $DOWNLOAD_SERVICE | pv -trep -w80 -N service > particld.service
-        if [ ! -e particld.service ] ; then
-           echo -e "${C_RED}error ${messages["downloading"]} file"
-           echo -e "tried to get particld.service$C_NORM"
+        pending " --> [systemd] installing particld.service ... "
+        mkdir -p /home/$USER/.config/systemd/user/
+        if cp -f $PARTYMAN_GITDIR/particld.service /home/$USER/.config/systemd/user/; then
+            ok "${messages["done"]}"
+        else err "${messages["FAILED"]}"
+        fi
+        pending " --> [systemd] enabling linger for user '$USER'... "
+        if sudo loginctl enable-linger $USER > /dev/null 2>&1; then
+            ok "${messages["done"]}"
         else
-           ok "${messages["done"]}"
-        pending " --> [systemd] installing service ... "
-        if sudo cp -rf particld.service /etc/systemd/system/; then
-            ok "${messages["done"]}"
+            err "${messages["FAILED"]}"
+            exit 1
         fi
-           pending " --> [systemd] reloading systemd service ... "
-        if sudo systemctl daemon-reload; then
+        pending " --> [systemd] reloading systemd service ... "
+        if systemctl --user daemon-reload > /dev/null 2>&1; then
             ok "${messages["done"]}"
+        else
+            err "${messages["FAILED"]}"
+            exit 1
         fi
-           pending " --> [systemd] enable particld system startup ... "
-        if sudo systemctl enable particld; then
-               ok "${messages["done"]}"
-           fi
+        pending " --> [systemd] enable particld.service at system startup ... "
+        if systemctl --user enable particld > /dev/null 2>&1; then
+            ok "${messages["done"]}"
+        else
+            err "${messages["FAILED"]}"
+            exit 1
         fi
     fi
 
@@ -676,13 +693,7 @@ update_particld(){
 
         # pummel it --------------------------------------------------------------
 
-        if [ $PARTYD_RUNNING == 1 ]; then
-            pending " --> ${messages["stopping"]} partcld. ${messages["please_wait"]}"
-            $PARTY_CLI stop >/dev/null 2>&1
-            sleep 15
-            killall -9 particld particl-shutoff >/dev/null 2>&1
-            ok "${messages["done"]}"
-        fi
+        stop_particld
 
         # prune it ---------------------------------------------------------------
 
@@ -694,9 +705,6 @@ update_particld(){
             "particl-qt-$CURRENT_VERSION" \
             particl-cli \
             "particl-cli-$CURRENT_VERSION"
-        #rm -rf \
-        #    "$DATA_DIR"/banlist.dat \
-        #    "$DATA_DIR"/peers.dat
         ok "${messages["done"]}"
 
         # place it ---------------------------------------------------------------
@@ -722,26 +730,9 @@ update_particld(){
 
         rm -rf "particl-${LATEST_VERSION}"
 
-        # punch it ---------------------------------------------------------------
+        # punch it / probe it ----------------------------------------------------
 
-        pending " --> ${messages["launching"]} particld... "
-        "$INSTALL_DIR/particld" -daemon > /dev/null 2>&1
-        ok "${messages["done"]}"
-
-        # probe it ---------------------------------------------------------------
-
-        pending " --> ${messages["waiting_for_particld_to_respond"]}"
-        echo -en "${C_YELLOW}"
-        PARTYD_RUNNING=1
-        while [ $PARTYD_RUNNING == 1 ] && [ $PARTYD_RESPONDING == 0 ]; do
-            echo -n "."
-            _check_particld_state
-            sleep 5
-        done
-        if [ $PARTYD_RUNNING == 0 ]; then
-            die "\n - particld unexpectedly quit. ${messages["exiting"]}"
-        fi
-        ok "${messages["done"]}"
+        start_particld
 
         # poll it ----------------------------------------------------------------
 
@@ -1366,7 +1357,12 @@ _get_particld_proc_status(){
             PARTYD_HASPID=0
         fi
     fi
-    PARTYD_PID=$(pgrep --pidfile "$DATA_DIR/particl.pid")
+
+    if [ $PARTYD_HASPID == 1 ] ; then
+      PARTYD_PID=$(pgrep --pidfile "$DATA_DIR/particl.pid")
+    else
+      unset PARTYD_PID
+    fi
 }
 
 get_particld_status(){
