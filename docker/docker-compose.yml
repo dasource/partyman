@@ -11,7 +11,6 @@ services:
       dockerfile: Dockerfile
       args:
         - CONTAINER_TIMEZONE="Europe/Helsinki"
-#    image: ludx/partyman:latest
     command: bin/entrypoint.sh
     ports:
       - "8080:8080"
@@ -24,7 +23,6 @@ services:
       - ./conf/crontab:/root/partyman/crontab
       - ./logs/debug.log:/root/.particl/debug.log
       - ./logs/cron.log:/root/partyman/cron.log
-
       - ../lib/functions.sh:/root/partyman/lib/functions.sh
       - ../bin/partyman.sh:/root/partyman/bin/partyman.sh
     environment:
