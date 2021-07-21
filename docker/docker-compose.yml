@@ -13,8 +13,8 @@ services:
         - CONTAINER_TIMEZONE="Europe/Helsinki"
     command: bin/entrypoint.sh
     ports:
-      - "8080:8080"
-      - "51738:51738"
+      - '8080:8080'
+      - '51738:51738'
     volumes:
       - particl_data:/root/.particl
       - ./conf/particl.conf:/root/.particl/particl.conf
