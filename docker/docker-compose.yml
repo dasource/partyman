@@ -16,8 +16,6 @@ services:
       - "8080:8080"
       - "51738:51738"
     volumes:
-#      - particlcore:/root/particlcore
-      - ./data/particlcore:/root/particlcore
       - particl_data:/root/.particl
       - ./conf/particl.conf:/root/.particl/particl.conf
       - ./conf/crontab:/root/partyman/crontab
