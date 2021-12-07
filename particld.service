@@ -1,0 +1,26 @@
+[Unit]
+Description=Particl daemon
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=%h/.particl/particl.pid
+ExecStart=%h/particlcore/particld -daemon -pid=%h/.particl/particl.pid -conf=%h/.particl/particl.conf -datadir=%h/.particl
+
+StartLimitInterval=120s
+StartLimitBurst=1
+
+Restart=on-failure
+TimeoutStopSec=600
+
+# Provide a private /tmp and /var/tmp.
+PrivateTmp=true
+
+# Mount /usr, /boot/ and /etc read-only for the process.
+ProtectSystem=full
+
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=default.target
