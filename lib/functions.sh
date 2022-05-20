@@ -320,7 +320,7 @@ _get_versions() {
     unset LATEST_VERSION
     LVCOUNTER=0
     RELEASES=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases )
-    while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
+    while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 10 ]; do
         RELEASE=$( echo "$RELEASES" | jq -r .[$LVCOUNTER] 2>/dev/null )
         PR=$( echo "$RELEASE" | jq .prerelease)
         if [ "$PR" == "false" ] || [ "$PRER" == 1 ]; then
