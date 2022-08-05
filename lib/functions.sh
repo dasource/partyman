@@ -323,7 +323,7 @@ _get_versions() {
     unset LATEST_VERSION
     LVCOUNTER=0
     RELEASES=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases )
-    while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
+    while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 16 ]; do
         RELEASE=$( echo "$RELEASES" | jq -r .[$LVCOUNTER] 2>/dev/null )
         PR=$( echo "$RELEASE" | jq .prerelease)
         if [ "$PR" == "false" ] || [ "$PRER" == 1 ]; then
@@ -332,8 +332,12 @@ _get_versions() {
             (( LVCOUNTER=LVCOUNTER+1 ))
         fi
     done
-
-    if [ -z "$LATEST_VERSION" ] && [ "$COMMAND" == "install" ]; then
+    if [ -z "$LATEST_VERSION" ] && ([ "$COMMAND" == "install" ] || [ "$COMMAND" == "update" ]); then
+        API_MESSAGE=$( echo "$RELEASES" | jq -r .message 2>/dev/null )
+        # Inform if "API rate limit exceeded"
+        if [ "$API_MESSAGE" ]; then
+            echo -e "\n\nAPI message: ${API_MESSAGE}"
+        fi
         die "\n${messages["err_could_not_get_version"]} $DOWNLOAD_PAGE -- ${messages["exiting"]}"
     fi
 
