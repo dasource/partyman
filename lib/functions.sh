@@ -33,6 +33,9 @@ DOWNLOAD_PAGE="https://github.com/particl/particl-core/releases"
 curl_cmd="timeout 7 curl -4 -s -L -A partyman/$PARTYMAN_VERSION"
 wget_cmd='wget -4 --no-check-certificate -q'
 
+# Path of script
+parent_path=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." ; pwd -P)
+
 
 # (mostly) functioning functions -- lots of refactoring to do ----------------
 
@@ -320,7 +323,7 @@ _get_versions() {
     unset LATEST_VERSION
     LVCOUNTER=0
     RELEASES=$( $curl_cmd https://api.github.com/repos/particl/particl-core/releases )
-    while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 5 ]; do
+    while [ -z "$LATEST_VERSION" ] && [ $LVCOUNTER -lt 16 ]; do
         RELEASE=$( echo "$RELEASES" | jq -r .[$LVCOUNTER] 2>/dev/null )
         PR=$( echo "$RELEASE" | jq .prerelease)
         if [ "$PR" == "false" ] || [ "$PRER" == 1 ]; then
@@ -329,8 +332,12 @@ _get_versions() {
             (( LVCOUNTER=LVCOUNTER+1 ))
         fi
     done
-
-    if [ -z "$LATEST_VERSION" ] && [ "$COMMAND" == "install" ]; then
+    if [ -z "$LATEST_VERSION" ] && ([ "$COMMAND" == "install" ] || [ "$COMMAND" == "update" ]); then
+        API_MESSAGE=$( echo "$RELEASES" | jq -r .message 2>/dev/null )
+        # Inform if "API rate limit exceeded"
+        if [ "$API_MESSAGE" ]; then
+            echo -e "\n\nAPI message: ${API_MESSAGE}"
+        fi
         die "\n${messages["err_could_not_get_version"]} $DOWNLOAD_PAGE -- ${messages["exiting"]}"
     fi
 
@@ -1147,7 +1154,7 @@ stakingnode_proposallist(){
         #fi
 
         pending " --> ${messages["proposal_reading"]}"
-        PROPOSALLIST=$( cat votingproposals/mainnet/metadata.txt | jq -r .);
+        PROPOSALLIST=$( cat "$parent_path/votingproposals/mainnet/metadata.txt" | jq -r .);
 
         if [ -z "$PROPOSALLIST" ]; then
            rm -rf proposal
@@ -1179,7 +1186,7 @@ stakingnode_proposalvote(){
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
-        if [ ! -e "votingproposals/mainnet/metadata.txt" ] ; then
+        if [ ! -e "$parent_path/votingproposals/mainnet/metadata.txt" ] ; then
             die "\n - no proposal data exists, please type 'partyman proposal list' ${messages["exiting"]}"
         fi
 
@@ -1198,8 +1205,8 @@ stakingnode_proposalvote(){
         read -r proposalid
 
         pending "checking if valid proposal ... "
-        PROPOSAL_HEIGHT_START=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
-        PROPOSAL_HEIGHT_END=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
+        PROPOSAL_HEIGHT_START=$( cat "$parent_path/votingproposals/mainnet/metadata.txt" | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
+        PROPOSAL_HEIGHT_END=$( cat "$parent_path/votingproposals/mainnet/metadata.txt" | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
 
         if [ -z "$PROPOSAL_HEIGHT_START" ]; then
             die "\n - not a valid proposal id! ' ${messages["exiting"]}"
@@ -1214,7 +1221,7 @@ stakingnode_proposalvote(){
 
         ok "${messages["done"]}"
 
-        PROPOSALDETAILS=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
+        PROPOSALDETAILS=$( cat "$parent_path/votingproposals/mainnet/metadata.txt" | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
         printf '%s\n' "$PROPOSALDETAILS"
 
         echo
@@ -1251,7 +1258,7 @@ stakingnode_proposaltally(){
             die "\n - no wallet exists, please type 'partyman stakingnode init' ${messages["exiting"]}"
         fi
 
-        if [ ! -e "votingproposals/mainnet/metadata.txt" ] ; then
+        if [ ! -e "$parent_path/votingproposals/mainnet/metadata.txt" ] ; then
             die "\n - no proposal data exists, please type 'partyman proposal list' ${messages["exiting"]}"
         fi
 
@@ -1260,15 +1267,15 @@ stakingnode_proposaltally(){
         read -r proposalid
 
         pending "checking if valid proposal ... "
-        PROPOSAL_HEIGHT_START=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
-        PROPOSAL_HEIGHT_END=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
+        PROPOSAL_HEIGHT_START=$( cat "$parent_path/votingproposals/mainnet/metadata.txt" | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_start" )
+        PROPOSAL_HEIGHT_END=$( cat "$parent_path/votingproposals/mainnet/metadata.txt" | jq ".[] | select(.proposalid == ${proposalid} ) | .blockheight_end" )
 
         if [ -z "$PROPOSAL_HEIGHT_START" ]; then
             die "\n - not a valid proposal id! ' ${messages["exiting"]}"
         fi
 
         ok "${messages["done"]}"
-        PROPOSALDETAILS=$( cat votingproposals/mainnet/metadata.txt | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
+        PROPOSALDETAILS=$( cat "$parent_path/votingproposals/mainnet/metadata.txt" | jq ".[] | select(.proposalid == ${proposalid} ) | ." )
         printf '%s\n' "$PROPOSALDETAILS"
 
 
