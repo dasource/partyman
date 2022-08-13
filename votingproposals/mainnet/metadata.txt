@@ -37,4 +37,14 @@
   "link-ccs": "https://ccs.particl.io/proposals/team-funding-proposal-2.html",
   "link-github": "https://github.com/particl/ccs-proposals/pull/12",
   "version": 1
+},
+{
+  "proposalid": 11,
+  "name": "Team Funding Proposal 3",
+  "network": "mainnet",
+  "blockheight_start": 1245040,
+  "blockheight_end": 1250079,
+  "link-ccs": "https://ccs.particl.io/proposals/team-funding-request-3.html",
+  "link-github": "https://github.com/particl/ccs-proposals/pull/18",
+  "version": 1
 }]
