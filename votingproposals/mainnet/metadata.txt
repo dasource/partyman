@@ -62,8 +62,8 @@
   "proposalid": 24,
   "name": "Team Funding Proposal 5",
   "network": "mainnet",
-  "blockheight_start": 1752531,
-  "blockheight_end": 1757570,
+  "blockheight_start": 1755500,
+  "blockheight_end": 1760539,
   "link-ccs": "https://ccs.particl.io/proposals/team-funding-request-5.html",
   "link-github": "https://github.com/particl/ccs-proposals/pull/24",
   "version": 1
