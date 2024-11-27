@@ -9,26 +9,32 @@ Particl wallet/daemon management utilities - version 0.11
 
 To install partyman do:
 
-    sudo apt-get install python git unzip pv jq dnsutils netcat-openbsd net-tools
+    sudo apt-get install curl python git unzip pv jq dnsutils netcat-openbsd net-tools
     cd ~ && git clone https://github.com/dasource/partyman
+
+*Note: If python is not available on your Linux distribution substitute python with python3 instead.*
 
 To get the current status of particld, do:
 
     partyman/partyman status
+   
+*Note: If you want a status monitor run "watch -n 60 -c partyman/partyman status"*
 
 To get the RPC command `getinfo` and `getwalletinfo` from particld, do:
 
     partyman/partyman getinfo
 
-
-
 To perform a new install of particl, do:
 
     partyman/partyman install
+   
+*Note: You can install pre-releases with `partyman/partyman install -prer`*
 
 To update to the latest version of particl, do:
 
     partyman/partyman update
+
+*Note: You can update to pre-releases with `partyman/partyman update -prer`*
 
 To overwrite an existing particl install, do:
 
@@ -37,8 +43,6 @@ To overwrite an existing particl install, do:
 To restart (or start) particld, do:
 
     partyman/partyman restart
-
-
 
 To create a new wallet on this staking node, do:
 
@@ -64,8 +68,6 @@ To configure the smsg fee rate target for this staking node, do:
 
     partyman/partyman stakingnode smsgfeeratetarget
 
-
-
 To install an create firewall/ufw rules to restrict access to only PORTS 22, 8080, 51738 and 51938, do:
 
     partyman/partyman firewall
@@ -73,8 +75,6 @@ To install an create firewall/ufw rules to restrict access to only PORTS 22, 808
 To disable the firewall/ufw and reset the rules, do:
 
     partyman/partyman firewall reset
-
-
 
 # Commands
 
